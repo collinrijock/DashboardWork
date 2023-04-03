@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.loader {
+  border-top-color: rgba(255, 86, 1, 1);
+  -webkit-animation: spinner 1.5s linear infinite;
+  animation: spinner 1.5s linear infinite;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@layer base {
+  h1 {
+    @apply text-4xl font-bold;
+  }
+
+  a.link {
+    @apply text-button_primary underline;
+  }
+
+  button.btn-primary,
+  a.btn-primary {
+    @apply text-white bg-button_primary py-4 px-12 rounded-3xl text-base leading-none;
+  }
+
+  button.btn-primary.small,
+  a.btn-primary.small {
+    @apply px-6;
+  }
+
+  button.microBtn {
+    @apply rounded-md;
+  }
+
+  button.microBtn > span {
+    @apply py-1 px-2 text-xs leading-none;
+  }
+
+  label {
+    @apply text-sm leading-none mb-4;
+  }
+
+  h2.layout_form_title,
+  h3.layout_form_title {
+    @apply font-bold text-2xl mb-4;
+  }
+
+  h2.checkout_section_title,
+  h3.checkout_section_title {
+    @apply font-bold text-xl mb-2 pb-2 border-b border-lulaBorder;
+  }
+
+  a.lula_highlight_bold {
+    @apply font-bold text-lulaNew underline;
+  }
+
+  a.lula_highlight {
+    @apply text-lulaNew underline;
+  }
+}
+
+@layer component {
+  button.btn-primary,
+  .btn-primary {
+    @apply text-white bg-button_primary py-4 px-12 rounded-3xl text-base leading-none;
+  }
+
+  .link {
+    @apply text-button_primary underline;
+  }
+
+  .layout_form_container {
+    @apply bg-white p-8 pb-10 rounded-lg;
+  }
+  .review_subtotal {
+    @apply grid grid-cols-[auto_3rem] py-2 px-6;
+  }
+
+  .checkout_section {
+    @apply p-10;
+  }
+
+  .checkout_container {
+    @apply bg-white rounded-lg;
+  }
+}
