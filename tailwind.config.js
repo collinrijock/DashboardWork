@@ -72,6 +72,7 @@ module.exports = {
       },
       fontFamily: {
         abel: ["Abel"],
+        lazzer: ["Lazzer"]
       },
     },
   },
