@@ -16,7 +16,7 @@ const Table: React.FC = () => {
     const fetchData = async () => {
       const response = await fetch("/api/generate-mock-data");
       const data = await response.json();
-      const formattedData = data.map((row) => ({
+      const formattedData = data.map((row: { createdDate: string | number | Date; }) => ({
         ...row,
         createdDate: new Date(row.createdDate),
       }));
