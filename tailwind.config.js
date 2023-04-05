@@ -1,14 +1,5 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   corePlugins: { preflight: false },
-  content: [
-    "./node_modules/flowbite-react/**/*.js",
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/tailwind-datepicker-react/dist/**/*.js",
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js",
-  ],
   safelist: [
     "xs:col-span-1",
     "xs:col-span-2",
@@ -47,38 +38,52 @@ module.exports = {
     "col-span-11",
     "col-span-12",
   ],
+  darkMode: 'class', // This enables dark mode
+  content: [
+    "./node_modules/flowbite-react/**/*.js",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/tailwind-datepicker-react/dist/**/*.js",
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js",
+  ],
   theme: {
-    container: {
-      center: true,
-      screens: {
-        "2xl": "1280px",
-      },
-    },
     extend: {
       colors: {
+        'primary': 'var(--color-bg-primary)',
+        'secondary': 'var(--color-bg-secondary)',
         lula: "rgba(255, 86, 1, 1)",
-        lulaNew: "#F07637",
-        text_primary: "rgba(51, 51, 85, 1)",
-        text_secondary: "rgba(51, 51, 85, 0.5)",
-        text_disabled: "rgba(198, 198, 208, 1)",
-        button_primary: "rgba(255, 86, 1, 1)",
-        button_secondary: "rgba(153, 153, 170, 1)",
-        lulaBorder: "#D1D5DB",
-        lulaBorder_secondary: "#455773",
-        background_secondary: "#E7EAF0",
+        // lulaNew: "#F07637",
+        // text_primary: "rgba(51, 51, 85, 1)",
+        // text_secondary: "rgba(51, 51, 85, 0.5)",
+        // text_disabled: "rgba(198, 198, 208, 1)",
+         button_primary: "rgba(255, 86, 1, 1)",
+        // button_secondary: "rgba(153, 153, 170, 1)",
+        // lulaBorder: "#D1D5DB",
+        // lulaBorder_secondary: "#455773",
+        // background_primary: "#FFFFFF",
+        // background_secondary: "#E7EAF0",
       },
-      screens: {
-        "3xl": "1920px",
+      backgroundColor: {
+        'primary': 'var(--color-bg-primary)',
+        'secondary': 'var(--color-bg-secondary)',
+        'primary-hover': 'var(--color-bg-primary-highlighted)',
       },
       fontFamily: {
         abel: ["Abel"],
-        lazzer: ["Lazzer"]
+        lazzer: ["Lazzer"],
+        caslonIonic: ["CaslonIonic"],
+        sans: ["Lazzer"],
+        serif: ["caslonIonic"]
       },
     },
+  },
+  variants: {
+    extend: {},
   },
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/line-clamp"),
-    require("flowbite/plugin"),
   ],
-};
+}
+

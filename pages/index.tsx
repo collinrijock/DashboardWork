@@ -15,7 +15,7 @@ export default function Home() {
       </Head>
       <main>
         <Header/>
-        <div className="flex flex-col h-screen p-12">
+        <div className="flex flex-col h-screen p-12 bg-secondary">
           <h1 className="w-full text-6xl p-2">Applications</h1>
           <Table/>
         </div>
