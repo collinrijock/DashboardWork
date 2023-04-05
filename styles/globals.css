@@ -4,3 +4,24 @@
 @import "./lux.css";
 /* @import "@lula-technologies-inc/lux/dist/lux.css"; */
 @import "./main.css";
+:root {
+  --color-bg-primary: #ffffff;
+  --color-bg-primary-highlighted: #E6E6E6; 
+  --color-bg-secondary: #f0f1f3;
+  --color-text-primary: #333354;
+}
+
+.dark {
+  --color-bg-primary: #3a3a5f; /* Darker primary color */
+  --color-bg-primary-highlighted: #4F4D72; 
+  --color-bg-secondary: #333354; /* Darker secondary color */
+  --color-text-primary: #ffffff;
+}
+body {
+  color: var(--color-text-primary);
+}
+input::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: var(--color-text-primary);
+  opacity: 1; /* Firefox */
+}

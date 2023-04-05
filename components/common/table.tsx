@@ -118,9 +118,9 @@ const Table: React.FC = () => {
     // Handle decline logic
   };
   return (
-    <div className="font-lazzer py-4">
+    <div className="font-sans py-4">
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="relative w-full border-none p-2 bg-background_secondary rounded-sm">
+        <div className="relative w-full border-none p-2 bg-primary rounded-sm">
           <Icon
             icon="magnifying-glass"
             className="absolute top-5 left-3.5 h-4 w-4 fa-solid text-gray-500"
@@ -128,19 +128,19 @@ const Table: React.FC = () => {
           <input
             type="text"
             placeholder="Search by Business Name, Contact Name, Email, Phone..."
-            className="w-full pl-10 pr-4 py-2 border-none bg-background_secondary rounded-sm"
+            className="w-full box-border pl-10 pr-4 py-2 border-none bg-primary"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <input
           type="date"
-          className="w-full border-none p-2 rounded bg-background_secondary"
+          className="w-full border-none p-2 rounded bg-primary"
           value={filterDate}
           onChange={(e) => setFilterDate(e.target.value)}
         />
         <select
-          className="w-full border-none p-2 rounded bg-background_secondary"
+          className="w-full border-none p-2 rounded bg-primary"
           value={filterInsuranceProgram}
           onChange={(e) => setFilterInsuranceProgram(e.target.value)}
         >
@@ -150,23 +150,23 @@ const Table: React.FC = () => {
           <option value="SLI">SLI</option>
         </select>
       </div>
-      <table className="table-auto bg-background_secondary w-full rounded-lg">
+      <table className="table-auto bg-primary w-full rounded-lg text-xs overflow-hidden">
         <thead>
           <tr>
-            <th className="px-4 py-2 w-1/7 text-start lula">CREATED DATE</th>
-            <th className="px-4 py-2 w-1/7 text-start">STATUS</th>
-            <th className="px-4 py-2 w-1/7 text-start">BUSINESS NAME</th>
-            <th className="px-4 py-2 w-1/7 text-start">CONTACT NAME</th>
-            <th className="px-4 py-2 w-1/7 text-start">INSURANCE PROGRAM</th>
-            <th className="px-4 py-2 w-1/7 text-start">SOURCE</th>
-            <th className="px-4 py-2 w-1/7 text-end"></th>
+            <th className="px-4 py-5 text-start font-medium ">CREATED DATE</th>
+            <th className="px-4 py-2 text-start font-medium ">STATUS</th>
+            <th className="px-4 py-2 text-start font-medium ">BUSINESS NAME</th>
+            <th className="px-4 py-2 text-start font-medium " >CONTACT NAME</th>
+            <th className="px-4 py-2 text-start font-medium ">INSURANCE PROGRAM</th>
+            <th className="px-4 py-2 text-start font-medium ">SOURCE</th>
+            <th className="px-4 py-2 text-end"></th>
           </tr>
         </thead>
         <tbody>
           {filteredData.map((row, index) => (
             <tr
               key={row.id}
-              className="cursor-pointer table-row transition-all duration-50 hover:bg-gray-300"
+              className="cursor-pointer table-row transition-all duration-50 hover:bg-primary-hover font-medium overflow-hidden"
               onClick={() => navigateToApplicantDetailPage(row)}
             >
               <td className="px-4 py-2">{row.createdDate.toDateString()}</td>
@@ -177,7 +177,7 @@ const Table: React.FC = () => {
               <td className="px-4 py-2">{row.source}</td>
               <td className="flex flex-row justify-around">
                 <button
-                  className="text-blue-500 p-2 px-4 border-gray-500 duration-75 transition-all hover:bg-white border-2 border-opacity-10 m-1 rounded-full"
+                  className="text-blue-500 bg-blue-100 hover:bg-blue-200 p-2 px-4 duration-75 transition-all border border-blue-500 border-opacity-10 m-1 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleApprove(index);
@@ -186,7 +186,7 @@ const Table: React.FC = () => {
                   Approve
                 </button>
                 <button
-                  className="text-red-500 p-2 px-4 border-gray-500 duration-75 transition-all hover:bg-white border-2 border-opacity-10 m-1 rounded-full"
+                  className="text-red-500 bg-red-100 hover:bg-red-200 p-2 px-4 duration-75 transition-all border border-red-500 border-opacity-10 m-1 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDecline(index);
