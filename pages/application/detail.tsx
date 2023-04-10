@@ -3,6 +3,16 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '@/components/common/Header';
 
+interface Field {
+  label: string;
+  key: string[];
+}
+
+interface Section {
+  title: string;
+  fields: Field[];
+}
+
 const ApplicationDetail = () => {
   const router = useRouter();
   const [application, setApplication] = useState(null);
@@ -20,7 +30,7 @@ const ApplicationDetail = () => {
     return <Header />;
   }
 
-  const sectionsConfig = [
+  const sectionsConfig: Section[] = [
     {
       title: "Applicant Information",
       fields: [
@@ -75,8 +85,8 @@ const ApplicationDetail = () => {
         {sectionsConfig.map((section, sectionIndex) => (
           <div key={sectionIndex} className="bg-primary p-4 my-4 rounded">
             <h3 className="text-xl font-serif mb-4">{section.title}</h3>
-            {section.fields.map((field, fieldIndex) => {
-              const fieldValue = field.key.reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined), application);
+            {section.fields.map((field: Field, fieldIndex) => {
+              const fieldValue = field.key.reduce((obj: any, key: string) => (obj && obj[key] !== undefined ? obj[key] : undefined), application);
 
               const isMissing = fieldValue === undefined;
               const displayValue = isMissing ? "Missing" : fieldValue;
