@@ -6,21 +6,42 @@ import { TableRow } from "../../types/TableRow"
 
 const Table: React.FC = () => {
   const [data, setData] = useState<TableRow[]>([]);
+  const [rawData, setRawData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<TableRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterInsuranceProgram, setFilterInsuranceProgram] = useState("");
+  const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api/generate-mock-data");
-      const data = await response.json();
-      const formattedData = data.map((row: { createdDate: string | number | Date; }) => ({
-        ...row,
-        createdDate: new Date(row.createdDate),
-      }));
+      const response = await fetch("/api/get-all-applications");
+      const rawData = await response.json();
+      setRawData(rawData);
 
+      const formattedData: TableRow[] = rawData.map((item: any) => {
+        const {
+          id,
+          createdOn,
+          status,
+          content,
+          insuranceProgram,
+          requester,
+        } = item;
+
+        return {
+          id,
+          createdDate: new Date(createdOn),
+          status,
+          businessName: content.asJson.businessName || '',
+          contactName: `${content.asJson.applicant?.firstName || ''} ${content.asJson.applicant?.lastName || ''}`.trim(),
+          insuranceProgram: insuranceProgram.name,
+          source: requester.source,
+          contactEmail: content.asJson.applicant?.email || '',
+          contactPhone: content.asJson.applicant?.phone || '',
+        };
+      });
       setData(formattedData);
     };
 
@@ -30,37 +51,8 @@ const Table: React.FC = () => {
   function navigateToApplicantDetailPage(row: TableRow) {
     router.push({
       pathname: "/application/detail",
-      query: { ...row, createdDate: row.createdDate.toISOString() },
+      query: { id: row.id },
     });
-  }
-  
-  function generateMockDataLocally() {
-    const data = [
-      {
-        id: 1,
-        createdDate: new Date(2023, 3, 3),
-        status: "In Progress",
-        businessName: "Collin Cars",
-        contactName: "Collin Rijock",
-        insuranceProgram: "Continuous Coverage",
-        source: "Car Sync",
-        contactEmail: "collin@example.com",
-        contactPhone: "123-456-7890",
-      },
-    ];
-
-    for (let i = 1; i < 10; i++) {
-      data.push({
-        ...data[0],
-        id: i + 1,
-        businessName: `${data[0].businessName} ${i}`,
-        contactName: `${data[0].contactName} ${i}`,
-        contactEmail: `collin${i}@example.com`,
-        contactPhone: `123-456-78${i}0`,
-      });
-    }
-
-    return data;
   }
 
   useEffect(() => {
@@ -153,12 +145,12 @@ const Table: React.FC = () => {
       <table className="table-auto bg-primary w-full rounded-lg text-xs overflow-hidden">
         <thead>
           <tr>
-            <th className="px-4 py-5 text-start font-medium ">CREATED DATE</th>
-            <th className="px-4 py-2 text-start font-medium ">STATUS</th>
-            <th className="px-4 py-2 text-start font-medium ">BUSINESS NAME</th>
-            <th className="px-4 py-2 text-start font-medium " >CONTACT NAME</th>
-            <th className="px-4 py-2 text-start font-medium ">INSURANCE PROGRAM</th>
-            <th className="px-4 py-2 text-start font-medium ">SOURCE</th>
+            <th className="px-4 py-5 text-start text-primary-dimmed uppercase tracking-widest font-normal">CREATED DATE</th>
+            <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal">STATUS</th>
+            <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal">BUSINESS NAME</th>
+            <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal" >CONTACT NAME</th>
+            <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal">INSURANCE PROGRAM</th>
+            <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal">SOURCE</th>
             <th className="px-4 py-2 text-end"></th>
           </tr>
         </thead>
@@ -166,7 +158,7 @@ const Table: React.FC = () => {
           {filteredData.map((row, index) => (
             <tr
               key={row.id}
-              className="cursor-pointer table-row transition-all duration-50 hover:bg-primary-hover font-medium overflow-hidden"
+              className="cursor-pointer table-row transition-all duration-50 hover:bg-primary-hover font-normal overflow-hidden"
               onClick={() => navigateToApplicantDetailPage(row)}
             >
               <td className="px-4 py-2">{row.createdDate.toDateString()}</td>

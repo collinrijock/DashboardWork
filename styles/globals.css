@@ -9,6 +9,7 @@
   --color-bg-primary-highlighted: #E6E6E6; 
   --color-bg-secondary: #f0f1f3;
   --color-text-primary: #333354;
+  --color-text-primary-dimmed: #6C727F;
 }
 
 .dark {
@@ -16,6 +17,7 @@
   --color-bg-primary-highlighted: #4F4D72; 
   --color-bg-secondary: #333354; /* Darker secondary color */
   --color-text-primary: #ffffff;
+  --color-text-primary-dimmed: rgb(156 156 186)
 }
 body {
   color: var(--color-text-primary);

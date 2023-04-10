@@ -1,119 +1,98 @@
-import { TableRow } from "../../types/TableRow";
-import React, { useState } from "react";
-import "tailwindcss/tailwind.css";
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import Header from '@/components/common/Header';
 
-type ApplicationDetailProps = {
-  row: TableRow;
-};
-
-const ApplicationDetail: React.FC<ApplicationDetailProps> = () => {
+const ApplicationDetail = () => {
   const router = useRouter();
-  const initialRow: TableRow = {
-    id: Number(router.query.id),
-    createdDate: new Date(router.query.createdDate as string),
-    status: router.query.status as string,
-    businessName: router.query.businessName as string,
-    contactName: router.query.contactName as string,
-    insuranceProgram: router.query.insuranceProgram as string,
-    source: router.query.source as string,
-    contactEmail: router.query.contactEmail as string,
-    contactPhone: router.query.contactPhone as string,
-  };
-  const [editableRow, setEditableRow] = useState<TableRow>(initialRow);
+  const [application, setApplication] = useState(null);
+  const { id } = router.query;
 
-  const handleSave = () => {
-    // Call an endpoint to save the data
-    console.log("Saving data:", editableRow);
-  };
+  useEffect(() => {
+    if (id) {
+      axios.get(`/api/get-application?id=${id}`).then((response) => {
+        setApplication(response.data);
+      });
+    }
+  }, [id]);
 
-  const handleApprove = () => {
-    // Handle approve logic
-  };
+  if (!application) {
+    return <Header />;
+  }
 
-  const handleDecline = () => {
-    // Handle decline logic
-  };
+  const sectionsConfig = [
+    {
+      title: "Applicant Information",
+      fields: [
+        { label: "First Name", key: ["firstName"] },
+        { label: "Last Name", key: ["lastName"] },
+        { label: "Email", key: ["email"] },
+        { label: "Phone", key: ["phone"] },
+      ],
+    },
+    {
+      title: "Business Information",
+      fields: [
+        { label: "EIN", key: ["ein"] },
+        { label: "Fleet Size", key: ["fleetSize"] },
+        { label: "Business Name", key: ["businessName"] },
+        { label: "Address Line 1", key: ["businessAddress", "addressLine1"] },
+        { label: "Address Line 2", key: ["businessAddress", "addressLine2"] },
+        { label: "City", key: ["businessAddress", "city"] },
+        { label: "State", key: ["businessAddress", "state"] },
+        { label: "ZIP", key: ["businessAddress", "zip"] },
+        { label: "Country", key: ["businessAddress", "country"] },
+      ],
+    },
+    {
+      title: "Insurance Program",
+      fields: [
+        { label: "Name", key: ["insuranceProgramName"] },
+        { label: "Version", key: ["insuranceProgramVersion"] },
+      ],
+    },
+    {
+      title: "Requester Information",
+      fields: [
+        { label: "Tenant ID", key: ["tenantId"] },
+        { label: "Source", key: ["source"] },
+        { label: "Created By", key: ["createdBy"] },
+      ],
+    },
+  ];
+
+
 
   return (
-    <div className="font-lazzer p-8">
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <label className="block font-semibold mb-2" htmlFor="businessName">
-            Business Name
-          </label>
-          <input
-            type="text"
-            id="businessName"
-            value={editableRow.businessName}
-            onChange={(e) =>
-              setEditableRow({ ...editableRow, businessName: e.target.value })
-            }
-            className="border border-gray-300 p-2 rounded w-full"
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-2" htmlFor="contactName">
-            Contact Name
-          </label>
-          <input
-            type="text"
-            id="contactName"
-            value={editableRow.contactName}
-            onChange={(e) =>
-              setEditableRow({ ...editableRow, contactName: e.target.value })
-            }
-            className="border border-gray-300 p-2 rounded w-full"
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-2" htmlFor="contactEmail">
-            Contact Email
-          </label>
-          <input
-            type="email"
-            id="contactEmail"
-            value={editableRow.contactEmail}
-            onChange={(e) =>
-              setEditableRow({ ...editableRow, contactEmail: e.target.value })
-            }
-            className="border border-gray-300 p-2 rounded w-full"
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-2" htmlFor="contactPhone">
-            Contact Phone
-          </label>
-          <input
-            type="tel"
-            id="contactPhone"
-            value={editableRow.contactPhone}
-            onChange={(e) =>
-              setEditableRow({ ...editableRow, contactPhone: e.target.value })
-            }
-            className="border border-gray-300 p-2 rounded w-full"
-          />
-        </div>
-      </div>
-      <div className="flex justify-end mt-8">
-        <button
-          className="text-blue-500 p-2 px-4 border-gray-500 duration-75 transition-all hover:bg-white border-2 border-opacity-10 m-1 rounded-full"
-          onClick={handleApprove}
-        >
-          Approve
-        </button>
-        <button
-          className="text-red-500 p-2 px-4 border-gray-500 duration-75 transition-all hover:bg-white border-2 border-opacity-10 m-1 rounded-full"
-          onClick={handleDecline}
-        >
-          Decline
-        </button>
-        <button
-          className="bg-blue-500 text-white p-2 px-4 rounded-full"
-          onClick={handleSave}
-        >
-          Save
-        </button>
+    <div className="bg-secondary">
+      <Header />
+      <button onClick={() => router.back()} className="bg-primary hover:bg-primary-hover p-2 m-4 rounded">
+        Back
+      </button>
+      <div className="container mx-auto p-4">
+      <h1 className="w-full text-6xl p-2">Application Details</h1>
+
+        {sectionsConfig.map((section, sectionIndex) => (
+          <div key={sectionIndex} className="bg-primary p-4 my-4 rounded">
+            <h3 className="text-xl font-serif mb-4">{section.title}</h3>
+            {section.fields.map((field, fieldIndex) => {
+              const fieldValue = field.key.reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined), application);
+
+              const isMissing = fieldValue === undefined;
+              const displayValue = isMissing ? "Missing" : fieldValue;
+
+              return (
+                <div key={fieldIndex} className="flex items-center my-2">
+                  <span className="w-1/4 text-primary-dimmed uppercase tracking-widest">{field.label}:</span>
+                  <span className={`text-lg ${isMissing ? "text-yellow-500" : ""}`}>
+                    {displayValue}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+
       </div>
     </div>
   );

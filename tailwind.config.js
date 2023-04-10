@@ -52,6 +52,7 @@ module.exports = {
       colors: {
         'primary': 'var(--color-bg-primary)',
         'secondary': 'var(--color-bg-secondary)',
+        'primary-dimmed': 'var(--color-text-primary-dimmed)',
         lula: "rgba(255, 86, 1, 1)",
         // lulaNew: "#F07637",
         // text_primary: "rgba(51, 51, 85, 1)",
