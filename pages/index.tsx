@@ -21,12 +21,12 @@ export default function Home() {
     });
     const provider = new GoogleAuthProvider();
     const auth = getAuth(app);
-    if(process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST) {
-        (auth as unknown as any)._canInitEmulator = true;
-        connectAuthEmulator(auth, process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST, {
-            disableWarnings: true,
-        });
-    }
+    // if(process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST) {
+    //     (auth as unknown as any)._canInitEmulator = true;
+    //     connectAuthEmulator(auth, process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST, {
+    //         disableWarnings: true,
+    //     });
+    // }
     const signIn = () => signInWithPopup(auth, provider);
     const signOut = () => auth.signOut();
     useEffect(() => {
