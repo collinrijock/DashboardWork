@@ -66,21 +66,7 @@ export default function Home() {
                 </>
             ) : (
                 <>
-                    <button onClick={signIn}>Sign In</button>
-                    <Head>
-                        <title>LULA Applications Dashboard</title>
-                        <meta
-                            name="description"
-                            content="Administrative dashboard for LULA applications."
-                        />
-                    </Head>
-                    <main>
-                        <Header/>
-                        <div className="flex flex-col h-screen p-12 bg-secondary">
-                            <h1 className="w-full text-6xl p-2">Applications</h1>
-                            <Table/>
-                        </div>
-                    </main>
+                    <button onClick={signIn}>Sign In</button>                    
                 </>
             )}
         </div>
