@@ -63,6 +63,7 @@ export default function Home() {
                             <Table/>
                         </div>
                     </main>
+                    <button onClick={signOut}>Sign Out</button>
                 </>
             ) : (
                 <>
