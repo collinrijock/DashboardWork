@@ -11,21 +11,22 @@ export default function Home() {
     const [logoutUrl, setLogoutUrl] = useState<string>()
     const [error, setError] = useState<any>()
     const app = initializeApp({
-        apiKey: 'AIzaSyBTSMnO6jdcyokeyv7JiGE0sQfhrxJhaUw',
-        authDomain: 'lula-app-staging-cba45.firebaseapp.com',
-        projectId: 'lula-app-staging-cba45',
-        storageBucket: 'lula-app-staging-cba45.appspot.com',
-        messagingSenderId: '762204877252',
-        appId: '1:762204877252:web:7da95f2dd90b00ae773491',
-        measurementId: 'G-Z97YSYZ6TD'
+        apiKey: `${process.env.NEXT_PUBLIC_FIREBASE_APIKEY}`,
+        authDomain: `${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}`,
+        projectId: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`,
+        storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`,
+        messagingSenderId: `${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}`,
+        appId: `${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}`,
+        measurementId: `${process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}`,
     });
     const provider = new GoogleAuthProvider();
     const auth = getAuth(app);
-    
-    // (auth as unknown as any)._canInitEmulator = true;
-    // connectAuthEmulator(auth, "http://localhost:9099", {
-    //     disableWarnings: true,
-    // });
+    // if(process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST) {
+    //     (auth as unknown as any)._canInitEmulator = true;
+    //     connectAuthEmulator(auth, process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST, {
+    //         disableWarnings: true,
+    //     });
+    // }
     const signIn = () => signInWithPopup(auth, provider);
     const signOut = () => auth.signOut();
     useEffect(() => {
@@ -36,13 +37,18 @@ export default function Home() {
         })
         
     }, [user, error])
-  return (
+   
+    return (
     <>
 
         <div>
             {user ? (
                 <>
                     <span>Signed in as : {user.email}</span>
+                    {
+                        // @ts-ignore
+                        console.log(user.accessToken)
+                    }
                     <Head>
                         <title>LULA Applications Dashboard</title>
                         <meta
@@ -60,21 +66,7 @@ export default function Home() {
                 </>
             ) : (
                 <>
-                    <button onClick={signIn}>Sign In</button>
-                    <Head>
-                        <title>LULA Applications Dashboard</title>
-                        <meta
-                            name="description"
-                            content="Administrative dashboard for LULA applications."
-                        />
-                    </Head>
-                    <main>
-                        <Header/>
-                        <div className="flex flex-col h-screen p-12 bg-secondary">
-                            <h1 className="w-full text-6xl p-2">Applications</h1>
-                            <Table/>
-                        </div>
-                    </main>
+                    <button onClick={signIn}>Sign In</button>                    
                 </>
             )}
         </div>
