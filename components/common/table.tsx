@@ -11,8 +11,29 @@ const Table: React.FC = () => {
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterInsuranceProgram, setFilterInsuranceProgram] = useState("");
-  const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterSource, setFilterSource] = useState("");
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const router = useRouter();
+
+  const clearFilters = () => {
+    setSearch("");
+    setFilterDate("");
+    setFilterInsuranceProgram("");
+    setFilterStatus("");
+  };
+
+  const handleRowSelection = (id: string, isChecked: boolean) => {
+    const newSelectedRows = new Set(selectedRows);
+
+    if (isChecked) {
+      newSelectedRows.add(id);
+    } else {
+      newSelectedRows.delete(id);
+    }
+
+    setSelectedRows(newSelectedRows);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,19 +99,22 @@ const Table: React.FC = () => {
           );
           filtered = filtered.filter((row) => {
             const rowCreatedDate = new Date(row.createdDate);
-            console.log("selected date", selectedDate);
-            console.log("filter date", filterDate);
-            console.log("row date", rowCreatedDate);
+            rowCreatedDate.setHours(0, 0, 0, 0);
             return rowCreatedDate.getTime() === selectedDate.getTime();
           });
         }
-
         if (filterInsuranceProgram) {
           filtered = filtered.filter(
             (row) => row.insuranceProgram === filterInsuranceProgram
           );
         }
-
+        if (filterStatus) {
+          filtered = filtered.filter((row) => row.status === filterStatus);
+        }
+    
+        if (filterSource) {
+          filtered = filtered.filter((row) => row.source === filterSource);
+        }
         // Sort by created date
         filtered.sort(
           (a, b) => a.createdDate.getTime() - b.createdDate.getTime()
@@ -100,51 +124,120 @@ const Table: React.FC = () => {
       }
     };
     filterAndSortData();
-  }, [search, filterDate, filterInsuranceProgram, data]);
+  }, [search, filterDate, filterInsuranceProgram, filterStatus, filterSource, data]);
 
-  const handleApprove = (index: number) => {
-    // Handle approve logic
+  const approveSelectedRows = () => {
+    // Handle logic for approving selected rows
+    console.log("Approved rows:", Array.from(selectedRows));
   };
 
-  const handleDecline = (index: number) => {
-    // Handle decline logic
+  const declineSelectedRows = () => {
+    // Handle logic for declining selected rows
+    console.log("Declined rows:", Array.from(selectedRows));
   };
+
+  const requestMoreInfoSelectedRows = () => {
+    // Handle logic for requesting more information for selected rows
+    console.log("Requested more info for rows:", Array.from(selectedRows));
+  };
+
   return (
     <div className="font-sans py-4">
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="relative w-full border-none p-2 bg-primary rounded-sm">
+        <div className="relative w-full col-span-2 border-none px-2 bg-primary rounded-sm">
           <Icon
             icon="magnifying-glass"
-            className="absolute top-5 left-3.5 h-4 w-4 fa-solid text-gray-500"
+            className="absolute top-3 left-3.5 h-4 w-4 fa-solid text-gray-500"
           />
           <input
             type="text"
-            placeholder="Search by Business Name, Contact Name, Email, Phone..."
-            className="w-full box-border pl-10 pr-4 py-2 border-none bg-primary"
+            placeholder="Search"
+            className="w-full box-border pl-10 pr-4 border-none bg-primary "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <input
           type="date"
-          className="w-full border-none p-2 rounded bg-primary"
+          className="w-full border-none px-2 rounded bg-primary grid place-content-center"
           value={filterDate}
           onChange={(e) => setFilterDate(e.target.value)}
         />
         <select
-          className="w-full border-none p-2 rounded bg-primary"
+          className="w-full border-none p-2 rounded bg-primary text-sm"
           value={filterInsuranceProgram}
           onChange={(e) => setFilterInsuranceProgram(e.target.value)}
         >
           <option value="">Filter by Insurance Program</option>
-          <option value="Continuous Coverage">Continuous Coverage</option>
+          <option value="ContinuousCoverage">Continuous Coverage</option>
           <option value="ORP">ORP</option>
           <option value="SLI">SLI</option>
         </select>
+        <select
+          className="w-full border-none p-2 rounded bg-primary text-sm"
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+        >
+          <option value="">Filter by Application Status</option>
+          <option value="New">New</option>
+          <option value="Incomplete">Incomplete</option>
+          <option value="Approved">Approved</option>
+          <option value="Declined">Declined</option>
+        </select>
+        <select
+          className="w-full border-none p-2 rounded bg-primary text-sm"
+          value={filterSource}
+          onChange={(e) => setFilterSource(e.target.value)}
+        >
+          <option value="">Filter by Source</option>
+          <option value="OnBoarding">On Boarding</option>
+          <option value="CAVF">CAVF</option>
+        </select>
+      </div>
+      <div className="flex justify-between items-center mb-4">
+        <button
+          className="font-normal bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-2002"
+          onClick={clearFilters}
+        >
+          Clear Filters
+        </button>
+        <div className="flex gap-x-2">
+          <button
+            className="font-normal bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200"
+            onClick={approveSelectedRows}
+          >
+            Approve selected
+          </button>
+          <button
+            className="font-normal bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200"
+            onClick={declineSelectedRows}
+          >
+            Decline selected
+          </button>
+          <button
+            className="font-normal bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200"
+            onClick={requestMoreInfoSelectedRows}
+          >
+            Request more info
+          </button>
+        </div>
       </div>
       <table className="table-auto bg-primary w-full rounded-lg text-xs overflow-hidden">
         <thead>
           <tr>
+            <th className="px-4 py-5 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              <input
+                type="checkbox"
+                className="cursor-pointer"
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  const newRowSelection = isChecked
+                    ? new Set(filteredData.map((row) => row.id))
+                    : new Set();
+                  setSelectedRows(newRowSelection);
+                }}
+              />
+            </th>
             <th className="px-4 py-5 text-start text-primary-dimmed uppercase tracking-widest font-normal">CREATED DATE</th>
             <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal">STATUS</th>
             <th className="px-4 py-2 text-start text-primary-dimmed uppercase tracking-widest font-normal">BUSINESS NAME</th>
@@ -158,39 +251,33 @@ const Table: React.FC = () => {
           {filteredData.map((row, index) => (
             <tr
               key={row.id}
-              className="cursor-pointer table-row transition-all duration-50 hover:bg-primary-hover font-normal overflow-hidden"
-              onClick={() => navigateToApplicantDetailPage(row)}
+              className="table-row transition-all duration-50 hover:bg-primary-hover font-normal overflow-hidden"
             >
-              <td className="px-4 py-2">{row.createdDate.toDateString()}</td>
+              <td className="px-4 py-2">
+                <input
+                  className="cursor-pointer"
+                  type="checkbox"
+                  checked={selectedRows.has(row.id)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleRowSelection(row.id, e.target.checked);
+                  }}
+                />
+              </td>
+              <td className="px-4 py-2">{row.createdDate.toLocaleDateString()}</td>
               <td className="px-4 py-2">{row.status}</td>
               <td className="px-4 py-2">{row.businessName}</td>
               <td className="px-4 py-2">{row.contactName}</td>
               <td className="px-4 py-2">{row.insuranceProgram}</td>
               <td className="px-4 py-2">{row.source}</td>
-              <td className="flex flex-row justify-around">
-                <button
-                  className="text-blue-500 bg-blue-100 hover:bg-blue-200 p-2 px-4 duration-75 transition-all border border-blue-500 border-opacity-10 m-1 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleApprove(index);
-                  }}
-                >
-                  Approve
-                </button>
-                <button
-                  className="text-red-500 bg-red-100 hover:bg-red-200 p-2 px-4 duration-75 transition-all border border-red-500 border-opacity-10 m-1 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDecline(index);
-                  }}
-                >
-                  Decline
-                </button>
+              <td className="px-4 py-2 grid place-content-center" onClick={() => navigateToApplicantDetailPage(row)}>
+                <Icon
+                  icon="arrow-right-to-line solid"
+                  className="cursor-pointer mr-1"
+                  style={{ width: "1.3rem", height: "1.3rem" }}
+                />
               </td>
             </tr>
-          ))}
-          {filteredData.map((row, index) => (
-            <tr key={index}></tr>
           ))}
         </tbody>
       </table>
