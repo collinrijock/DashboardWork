@@ -13,12 +13,12 @@ export default function Home() {
     console.log(process.env.NEXT_PUBLIC_FIREBASE_APIKEY)
     const app = initializeApp({
         apiKey: 'AIzaSyBTSMnO6jdcyokeyv7JiGE0sQfhrxJhaUw',
-        authDomain: `${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}`,
-        projectId: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`,
-        storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`,
-        messagingSenderId: `${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}`,
-        appId: `${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}`,
-        measurementId: `${process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}`,
+        authDomain: 'lula-app-staging-cba45.firebaseapp.com',
+        projectId: 'lula-app-staging-cba45',
+        storageBucket: 'lula-app-staging-cba45.appspot.com',
+        messagingSenderId: '762204877252',
+        appId: '1:762204877252:web:7da95f2dd90b00ae773491',
+        measurementId: 'G-Z97YSYZ6TD'
     });
     const provider = new GoogleAuthProvider();
     const auth = getAuth(app);
