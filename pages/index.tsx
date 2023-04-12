@@ -10,8 +10,9 @@ export default function Home() {
     const [user, setUser] = useState<User>()
     const [logoutUrl, setLogoutUrl] = useState<string>()
     const [error, setError] = useState<any>()
+    console.log(process.env.NEXT_PUBLIC_FIREBASE_APIKEY)
     const app = initializeApp({
-        apiKey: `${process.env.NEXT_PUBLIC_FIREBASE_APIKEY}`,
+        apiKey: 'AIzaSyBTSMnO6jdcyokeyv7JiGE0sQfhrxJhaUw',
         authDomain: `${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}`,
         projectId: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`,
         storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`,
