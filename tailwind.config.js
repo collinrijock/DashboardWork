@@ -50,8 +50,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'primary': 'var(--color-bg-primary)',
-        'secondary': 'var(--color-bg-secondary)',
+        'primary': 'var(--color-text-primary)',
+        'secondary': 'var(--color-text-secondary)',
         'primary-dimmed': 'var(--color-text-primary-dimmed)',
         lula: "rgba(255, 86, 1, 1)",
         // lulaNew: "#F07637",
@@ -75,7 +75,7 @@ module.exports = {
         lazzer: ["Lazzer"],
         caslonIonic: ["CaslonIonic"],
         sans: ["Lazzer"],
-        serif: ["caslonIonic"]
+        serif: ["CaslonIonic"]
       },
     },
   },

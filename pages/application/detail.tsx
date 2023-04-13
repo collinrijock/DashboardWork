@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '@/components/common/Header';
+import Header from '@/components/common/header';
 
 interface Field {
   label: string;
