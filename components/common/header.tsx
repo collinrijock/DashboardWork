@@ -31,19 +31,19 @@ const Header: FC = () => {
   }, []);
 
   return (
-    <div className="w-full h-16 bg-primary shadow">
-      <div className="h-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+    <div className="w-full h-20 bg-primary shadow">
+      <div className="h-20 mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
         <Link className="grid place-content-center" href="/">
             <Icon
               icon="lula-logo"
               title="LULA Logo"
               className="text-lula aria-hidden mt-1"
-              size={2}
+              size={ICON_SIZES.XL}
             />
         </Link>
         {user && (<div className="relative ml-auto">
           <button
-            className="rounded-full w-10 h-10 border-2 border-primary-dimmed hover:border-primary grid place-content-center cursor-pointer transition-all duration-200"
+            className="rounded-full w-10 h-10 border-2 border-primary-dimmed hover:border-primary grid place-content-center cursor-pointer transition-all duration-200 animate-fade-in"
             onClick={toggleDropdown}
           >
             <Icon

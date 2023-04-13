@@ -17,7 +17,23 @@ const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
 
-const signIn = () => signInWithPopup(auth, provider);
+const signIn = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const userEmail = result.user.email;
+
+    if (!userEmail?.endsWith('@lula.is')) {
+      alert('Please use a lula.is domain email to sign in.');
+      await firebaseSignOut(auth);
+    }
+  } catch (error: any) {
+    if (error?.code === 'auth/popup-closed-by-user') {
+      console.log('Popup closed by user.');
+    } else {
+      console.error('Error signing in:', error);
+    }
+  }
+};
 
 const signOut = () => firebaseSignOut(auth);
 
