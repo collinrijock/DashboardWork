@@ -495,10 +495,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@lula-technologies-inc/lux@^0.2.18":
-  version "0.2.19"
-  resolved "https://npm.pkg.github.com/download/@Lula-Technologies-Inc/lux/0.2.19/6cef877e3ec667e30e679b869960e19d4ca8e0be#6cef877e3ec667e30e679b869960e19d4ca8e0be"
-  integrity sha512-I4Fv6W0v26+jaDfJjXuFBFzQomV9jTp4BSKV+1otI9G9ZOOAN8w2JBmVWfikwFZMCm9+xGY6Gc+H6uFE7KNFTg==
+"@lula-technologies-inc/lux@^0.2.20":
+  version "0.2.20"
+  resolved "https://npm.pkg.github.com/download/@Lula-Technologies-Inc/lux/0.2.20/f25a12f44716e8f6414c9235f89b89bd3f24a58b#f25a12f44716e8f6414c9235f89b89bd3f24a58b"
+  integrity sha512-OKqkPWIK3iqXwpo+eRD0Mp2IYt7Aziywj3VGoWZdLQzycNDqj4dKGOxVsA08uTrA+kclnNFngnJefrKK1WlaHw==
 
 "@next/env@13.2.4":
   version "13.2.4"

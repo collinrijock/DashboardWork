@@ -7,12 +7,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const response = await axios({
       method: 'post',
-      url: 'https://api.staging-lula.is/embedded/v1/backoffice/',
+      url: 'https://api.staging-lula.is/embedded/v1/backoffice/statusupdate',
       headers: {
         'Authorization': 'Bearer 1eJ9AIIMZ9KQF70BlAipo6EPeIVte0Gr',
         'Content-Type': 'application/json',
       },
-      data: {},
+      data: {...req.body},
     });
 
     
