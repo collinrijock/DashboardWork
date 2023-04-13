@@ -1,6 +1,6 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Icon } from "@lula-technologies-inc/lux";
+import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 const Header: FC = () => {
@@ -38,24 +38,24 @@ const Header: FC = () => {
               icon="lula-logo"
               title="LULA Logo"
               className="text-lula aria-hidden mt-1"
-              style={{ width: 150, height: 31 }}
+              size={2}
             />
         </Link>
         {user && (<div className="relative ml-auto">
           <button
-            className="rounded-full border-2 border-primary grid place-content-center cursor-pointer"
+            className="rounded-full w-10 h-10 border-2 border-primary-dimmed hover:border-primary grid place-content-center cursor-pointer transition-all duration-200"
             onClick={toggleDropdown}
           >
             <Icon
               icon="user"
               title="User Icon"
-              className="text-primary aria-hidden p-2 fa-solid"
-              style={{ width: 22, height: 22 }}
+              className="text-primary-dimmed aria-hidden p-2 fa-solid hover:text-primary transition-all duration-200"
+              size={ICON_SIZES.XL}
             />
           </button>
           {/* Dropdown */}
           {dropdownVisible && (
-            <div ref={dropdownRef} className="absolute overflow-hidden right-0 mt-3 w-48 bg-primary rounded-lg shadow-2xl divide-y divide-gray-100 text-primary text-sm z-10 animate-fade-in-down">
+            <div ref={dropdownRef} className="absolute overflow-hidden right-0 mt-3 w-48 bg-primary rounded-lg shadow-2xl text-primary text-sm z-10 animate-fade-in-down">
               
               <div className="px-4 py-2">
                 Signed in as:

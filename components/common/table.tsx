@@ -13,7 +13,7 @@ const Table: React.FC = () => {
   const [filterInsuranceProgram, setFilterInsuranceProgram] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterSource, setFilterSource] = useState("");
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [selectedRows, setSelectedRows] = useState<Set<any>>(new Set());
   const router = useRouter();
 
   const clearFilters = () => {
@@ -159,6 +159,7 @@ const Table: React.FC = () => {
         </div>
         <input
           type="date"
+          placeholder="dd/mm/yyyy"
           className="w-full border-none px-2 rounded bg-primary grid place-content-center"
           value={filterDate}
           onChange={(e) => setFilterDate(e.target.value)}
@@ -231,7 +232,7 @@ const Table: React.FC = () => {
                 className="cursor-pointer"
                 onChange={(e) => {
                   const isChecked = e.target.checked;
-                  const newRowSelection = isChecked
+                  const newRowSelection  = isChecked
                     ? new Set(filteredData.map((row) => row.id))
                     : new Set();
                   setSelectedRows(newRowSelection);
@@ -260,7 +261,7 @@ const Table: React.FC = () => {
                   checked={selectedRows.has(row.id)}
                   onChange={(e) => {
                     e.stopPropagation();
-                    handleRowSelection(row.id, e.target.checked);
+                    handleRowSelection(String(row.id), e.target.checked);
                   }}
                 />
               </td>
@@ -274,7 +275,7 @@ const Table: React.FC = () => {
                 <Icon
                   icon="arrow-right-to-line solid"
                   className="cursor-pointer mr-1"
-                  style={{ width: "1.3rem", height: "1.3rem" }}
+                  size={2}
                 />
               </td>
             </tr>
