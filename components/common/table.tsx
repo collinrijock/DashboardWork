@@ -311,7 +311,7 @@ const Table: React.FC = () => {
             <React.Fragment key={row.id}>
               <tr
                 key={row.id}
-                className="table-row transition-all duration-50 hover:bg-primary-hover font-normal overflow-hidden border-t"
+                className="table-row transition-all duration-50 hover:bg-primary-hover font-normal border-primary-hover overflow-hidden border-t"
               >
                 <td className="px-4 py-2">
                   <input

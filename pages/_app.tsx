@@ -1,10 +1,16 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
+import Header from "../components/common/header";
+import Signin from '@/components/common/signin';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useRouter } from 'next/router';
 import useDarkMode from "../hooks/useDarkMode";
 
 export default function App({ Component, pageProps }: AppProps) {
   const darkMode = useDarkMode();
+  const { user } = useFirebaseAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (darkMode) {
@@ -13,5 +19,14 @@ export default function App({ Component, pageProps }: AppProps) {
       document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
-  return <Component {...pageProps} />;
+
+  if (!user) {
+    return <Signin />;
+  }
+
+  return (
+    <div>
+      <Header />
+      <Component {...pageProps} />
+    </div>)
 }
