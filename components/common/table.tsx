@@ -391,27 +391,7 @@ const Table: React.FC = () => {
                 </tr>
               )}
             </React.Fragment>
-          ))}
-          {/* empty row */}
-          {filteredData.length == 0 &&
-            Array.from({ length: displayedRowCount - filteredData.length }, (_, i) => (
-              <tr
-                key={`empty-row-${i}`}
-                className="table-row font-normal overflow-hidden relative"
-              >
-                <div
-                  className={`absolute inset-0 z-10 animate-pulse bg-black dark:bg-white`}
-                  style={{ opacity: Math.random() * 0.05 }}
-                ></div>
-
-
-                {Array.from({ length: displayedRowCount }, (_, i) => (
-                  <td key={`empty-cell-${i}`} className="px-4 py-3">
-                    <div className="w-full h-full">&nbsp;</div>
-                  </td>
-                ))}
-              </tr>
-            ))}
+          ))}          
         </tbody>
         {
           filteredData.length > displayedRowCount && (
