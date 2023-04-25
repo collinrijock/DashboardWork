@@ -10,6 +10,7 @@
   --color-bg-secondary: #f0f1f3;
   --color-text-primary: #333354;
   --color-text-primary-dimmed: #6C727F;
+  --color-lula: rgba(255, 86, 1, 1);
 }
 
 .dark {
@@ -69,4 +70,13 @@ input::placeholder {
 
 .animate-fade-in {
   animation: fadeIn 300ms ease-out forwards;
+}
+
+.area-chart-animation {
+  animation: fadeInFromBottom 1s ease-out;
+}
+
+.reference-dot {
+  opacity: 0;
+  animation: fadeInFromBottom 1s ease-out 1s forwards;
 }

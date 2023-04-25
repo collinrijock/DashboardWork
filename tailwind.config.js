@@ -54,7 +54,7 @@ module.exports = {
         'secondary': 'var(--color-text-secondary)',
         'primary-dimmed': 'var(--color-text-primary-dimmed)',
         'primary-hover': 'var(--color-bg-primary-highlighted)',
-        lula: "rgba(255, 86, 1, 1)",
+        lula: "var(--color-lula)",
         // lulaNew: "#F07637",
         // text_primary: "rgba(51, 51, 85, 1)",
         // text_secondary: "rgba(51, 51, 85, 0.5)",

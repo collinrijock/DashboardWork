@@ -1,5 +1,16 @@
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, Defs, LinearGradient, Stop } from 'recharts';
+import React, { useEffect, useState } from 'react';
+
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  ReferenceDot,
+  Label,
+} from 'recharts';
+import useDarkMode from '@/hooks/useDarkMode'; // Import your dark mode hook
 
 const data = [
   { name: 'Jan', total: 500 },
@@ -10,33 +21,69 @@ const data = [
   { name: 'Jun', total: 630 },
   { name: 'Jul', total: 640 },
   { name: 'Aug', total: 650 },
-  // Add more data points as needed
 ];
 
 const TotalVehiclesCard: React.FC = () => {
+  const darkMode = useDarkMode();
+  const [showDot, setShowDot] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowDot(true);
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const lineColor = darkMode ? '#6A69D3' : 'var(--color-lula)';
+  const gradientColor = darkMode ? '#8180FFC4' : 'var(--color-lula)';
+  const latestDataPoint = data[data.length - 1];
+
   return (
-    <div className="bg-primary shadow-xl rounded-lg p-6 w-96">
-      <div className="flex flex-row">
+    <div className={`bg-primary shadow-xl rounded-lg p-6 w-96`}>
+      <div className="flex flex-row mb-8">
         <h3 className="font-serif">Total Vehicles</h3>
-        <h3 className="font-serif ml-auto text-6xl">650</h3>
       </div>
 
       {/* Add data visualization UI here */}
       <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <Defs>
-            <LinearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="5%" stopColor="#FF6666" stopOpacity={0.8} />
-              <Stop offset="95%" stopColor="#FF6666" stopOpacity={0} />
-            </LinearGradient>
-          </Defs>
+        <AreaChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <defs>
+            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={gradientColor} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={gradientColor} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke='var(--color-bg-primary-highlighted)' strokeDasharray="0 0" horizontal={true} vertical={false} />
           <XAxis dataKey="name" />
           <YAxis />
-          <Tooltip />
-          <CartesianGrid strokeDasharray="3 3" stroke="#ccc" strokeOpacity={0.3} />
-          <Line type="monotone" dataKey="total" stroke="#FF6666" dot={false} />
-          <Area type="monotone" dataKey="total" stroke="#FF6666" fillOpacity={1} fill="url(#colorTotal)" />
-        </LineChart>
+          <Area type="monotone" dataKey="total" stroke={lineColor} fill="url(#colorUv)" />
+          {showDot && (
+            <ReferenceDot
+              x={latestDataPoint.name}
+              y={latestDataPoint.total}
+              r={6}
+              fill={lineColor}
+              className="animate-fade-in"
+              stroke={darkMode ? 'white' : 'var(--color-lula)'}
+              strokeWidth={6}
+              
+            >
+              
+              <Label
+              value={latestDataPoint.total}
+              position="top"
+              offset={10}
+              fill={"var(--color-text-primary)"}
+              fontSize={14}
+              fontWeight="bold"
+              className='font-sans font-normal w-10'
+            />
+            </ReferenceDot>
+          )}
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
