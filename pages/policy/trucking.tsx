@@ -26,10 +26,9 @@ const PostPolicy = () => {
                 },
                 body: JSON.stringify({
                     accountEntityId,
-                    policyNumber,
-                    limit: limit.replace(/,/g, ''),
-                    deductible: deductible.replace(/,/g, ''),
-                    token,
+                    deductible,
+                    limit,
+                    policyNumber
                 }),
             });
 
