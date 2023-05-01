@@ -6,6 +6,7 @@ const PostPolicy = () => {
     const [policyNumber, setPolicyNumber] = useState('');
     const [limit, setLimit] = useState('');
     const [deductible, setDeductible] = useState('');
+    const [recentRequests, setRecentRequests] = useState<string[]>([]);
     const { token } = useFirebaseAuth();
 
     const handleNumberInput = (event: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
@@ -13,25 +14,29 @@ const PostPolicy = () => {
         setter(formattedValue);
     };
 
+
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         try {
-            const response = await fetch(`https://api.staging-lula.is/policy/${accountEntityId}`, {
+            const response = await fetch('/api/submit-policy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token && { 'x-firebase-auth': token }),
                 },
                 body: JSON.stringify({
+                    accountEntityId,
                     policyNumber,
                     limit: limit.replace(/,/g, ''),
                     deductible: deductible.replace(/,/g, ''),
+                    token,
                 }),
             });
 
             if (response.ok) {
                 alert('Policy submitted successfully!');
+                const newRequest = `Submitted: ${accountEntityId} - ${policyNumber} - ${limit} - ${deductible}`;
+                setRecentRequests((prev) => [newRequest, ...prev.slice(0, 9)]);
                 clearForm();
             } else {
                 alert('Failed to submit the policy. Please try again.');
@@ -41,6 +46,7 @@ const PostPolicy = () => {
             alert('An error occurred while submitting the policy. Please try again.');
         }
     };
+
 
     const clearForm = () => {
         setAccountEntityId('');
@@ -112,7 +118,15 @@ const PostPolicy = () => {
                     </button>
                 </div>
             </form>
-        </div>
+            <div className="mt-12">
+                <h1 className="text-4xl mb-4">Recently Added</h1>
+                <ul>
+                    {recentRequests.map((request, index) => (
+                        <li key={index}>{request}</li>
+                    ))}
+                </ul>
+            </div>
+        </div >
     );
 };
 
