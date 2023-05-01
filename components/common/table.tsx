@@ -61,34 +61,46 @@ const Table: React.FC = () => {
   };
 
   const fetchData = async () => {
-    const response = await fetch("/api/get-all-applications");
-    const rawData = await response.json();
-    setRawData(rawData);
-
-    const formattedData: TableRow[] = rawData.map((item: any) => {
-      const {
-        id,
-        createdOn,
-        status,
-        content,
-        insuranceProgram,
-        requester,
-      } = item;
-
-      return {
-        id,
-        createdDate: new Date(createdOn),
-        status,
-        businessName: content.asJson.businessName || '',
-        contactName: `${content.asJson.applicant?.firstName || ''} ${content.asJson.applicant?.lastName || ''}`.trim(),
-        insuranceProgram: insuranceProgram.name,
-        source: requester.source,
-        contactEmail: content.asJson.applicant?.email || '',
-        contactPhone: content.asJson.applicant?.phone || '',
-      };
-    });
-    setData(formattedData);
+    try {
+      const response = await fetch("/api/get-applications");
+  
+      if (!response.ok) {
+        throw new Error(`An error occurred: ${response.statusText}`);
+      }
+  
+      const rawData = await response.json();
+      setRawData(rawData);
+  
+      const formattedData: TableRow[] = rawData.map((item: any) => {
+        const {
+          id,
+          createdOn,
+          status,
+          content,
+          insuranceProgram,
+          requester,
+        } = item;
+  
+        return {
+          id,
+          createdDate: new Date(createdOn),
+          status,
+          businessName: content.asJson.businessName || '',
+          contactName: `${content.asJson.applicant?.firstName || ''} ${content.asJson.applicant?.lastName || ''}`.trim(),
+          insuranceProgram: insuranceProgram.name,
+          source: requester.source,
+          contactEmail: content.asJson.applicant?.email || '',
+          contactPhone: content.asJson.applicant?.phone || '',
+        };
+      });
+      setData(formattedData);
+    } catch (error: any) {
+      console.error('Error fetching data:', error.message);
+      // Set data to an empty array if fetch fails
+      setData([]);
+    }
   };
+  
 
   useEffect(() => {
     fetchData();
@@ -311,7 +323,7 @@ const Table: React.FC = () => {
             <React.Fragment key={row.id}>
               <tr
                 key={row.id}
-                className="table-row transition-all duration-50 hover:bg-primary-hover font-normal overflow-hidden border-t"
+                className="table-row transition-all duration-50 hover:bg-primary-hover font-normal border-primary-hover overflow-hidden border-t"
               >
                 <td className="px-4 py-2">
                   <input
@@ -391,7 +403,27 @@ const Table: React.FC = () => {
                 </tr>
               )}
             </React.Fragment>
-          ))}          
+          ))}
+          {/* empty row */}
+          {filteredData.length == 0 &&
+            Array.from({ length: displayedRowCount - filteredData.length }, (_, i) => (
+              <tr
+                key={`empty-row-${i}`}
+                className="table-row w-full font-normal overflow-hidden relative"
+              >
+                <div
+                  className={`w-full inset-0 z-10 bg-black dark:bg-white`}
+                  style={{ opacity: Math.random() * 0.05 }}
+                ></div>
+
+
+                {Array.from({ length: displayedRowCount }, (_, i) => (
+                  <td key={`empty-cell-${i}`} className="px-4 py-3">
+                    <div className="w-full h-full">&nbsp;</div>
+                  </td>
+                ))}
+              </tr>
+            ))}
         </tbody>
         {
           filteredData.length > displayedRowCount && (

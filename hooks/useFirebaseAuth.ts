@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@firebase/auth';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from '@firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, getIdToken } from '@firebase/auth';
 
 const app = initializeApp({
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_APIKEY,
@@ -42,17 +42,24 @@ const observeAuthState = (callback: (user: User | null) => void) => {
 };
 
 export const useFirebaseAuth = () => {
-    const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User>();
+  const [token, setToken] = useState<string>();
 
-    useEffect(() => {
-        const unsubscribe = observeAuthState((user: any) => {
-            return setUser(user);
-        });
+  useEffect(() => {
+      const unsubscribe = observeAuthState(async (user: any) => {
+          setUser(user);
+          if (user) {
+              const idToken = await getIdToken(user);
+              setToken(idToken);
+          } else {
+              setToken(undefined);
+          }
+      });
 
-        return () => {
-            unsubscribe();
-        };
-    }, []);
+      return () => {
+          unsubscribe();
+      };
+  }, []);
 
-    return { user, signIn, signOut };
+  return { user, token, signIn, signOut };
 };
