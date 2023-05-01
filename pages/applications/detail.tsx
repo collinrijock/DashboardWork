@@ -26,10 +26,6 @@ const ApplicationDetail = () => {
     }
   }, [id]);
 
-  if (!application) {
-    return <Header />;
-  }
-
   const sectionsConfig: Section[] = [
     {
       title: "Applicant Information",
@@ -75,7 +71,6 @@ const ApplicationDetail = () => {
 
   return (
     <div className="bg-secondary">
-      <Header />
       <button onClick={() => router.back()} className="bg-primary hover:bg-primary-hover p-2 m-4 rounded">
         Back
       </button>

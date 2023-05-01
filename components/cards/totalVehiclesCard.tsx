@@ -65,7 +65,7 @@ const TotalVehiclesCard: React.FC = () => {
               x={latestDataPoint.name}
               y={latestDataPoint.total}
               r={6}
-              fill={lineColor}
+              fill={darkMode ? lineColor : 'white'}
               className="animate-fade-in"
               stroke={darkMode ? 'white' : 'var(--color-lula)'}
               strokeWidth={6}

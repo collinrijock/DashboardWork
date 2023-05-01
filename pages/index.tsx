@@ -7,7 +7,7 @@ export default function Home() {
   const firstName = user?.displayName?.split(" ")[0] || "";
 
   return (
-    <div className="flex flex-col p-12 animate-fade-in">
+    <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">
       <h1 className="w-full text-6xl p-2">Welcome {firstName}</h1>
       <div >
         <h2 className='font-serif text-2xl mt-12 p-2'>
