@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import Head from 'next/head';
 
 const PostPolicy = () => {
     const [accountEntityId, setAccountEntityId] = useState('');
@@ -14,38 +15,39 @@ const PostPolicy = () => {
         setter(formattedValue);
     };
 
-
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-    
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_LULA_API_URL}/policy/${accountEntityId}`, {
-                method: 'POST',
+            const response = await fetch("/api/submit-policy", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'x-firebase-auth': token }),
+                    "Content-Type": "application/json",
+                    ...(token && { "x-firebase-auth": token }),
                 },
                 body: JSON.stringify({
+                    accountEntityId,
                     policyNumber,
                     limit,
                     deductible,
                 }),
             });
-    
+
             if (response.ok) {
-                alert('Policy submitted successfully!');
+                alert("Policy submitted successfully!");
                 const newRequest = `Submitted: ${accountEntityId} - ${policyNumber} - ${limit} - ${deductible}`;
                 setRecentRequests((prev) => [newRequest, ...prev.slice(0, 9)]);
                 clearForm();
             } else {
-                alert('Failed to submit the policy. Please try again.');
+                alert("Failed to submit the policy. Please try again.");
             }
         } catch (error) {
-            console.error('Error submitting policy:', error);
-            alert('An error occurred while submitting the policy. Please try again.');
+            console.error("Error submitting policy:", error);
+            alert("An error occurred while submitting the policy. Please try again.");
         }
     };
-    
+
+
 
 
     const clearForm = () => {
@@ -57,6 +59,9 @@ const PostPolicy = () => {
 
     return (
         <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">
+            <Head>
+                <title>Trucking Policy</title>
+            </Head>
             <h1 className="w-full text-6xl p-2">Trucking Policy Form</h1>
             <form className='mt-12' onSubmit={submitForm}>
                 <label htmlFor="accountEntityId" className="block">
