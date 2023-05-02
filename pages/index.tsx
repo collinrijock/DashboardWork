@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import TotalVehiclesCard from '../components/cards/totalVehiclesCard';
+import Head from 'next/head';
 
 export default function Home() {
   const { user } = useFirebaseAuth();
@@ -8,6 +9,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">
+      <Head>
+        <title>Paddocks</title>
+      </Head>
       <h1 className="w-full text-6xl p-2">Welcome {firstName}</h1>
       <div >
         <h2 className='font-serif text-2xl mt-12 p-2'>

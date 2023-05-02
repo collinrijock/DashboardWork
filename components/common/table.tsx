@@ -3,6 +3,7 @@ import "tailwindcss/tailwind.css";
 import { useRouter } from "next/router";
 import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
 import { TableRow } from "../../types/TableRow";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import axios from "axios";
 
 const Table: React.FC = () => {
@@ -21,6 +22,7 @@ const Table: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<Set<any>>(new Set());
   const [displayedRowCount, setDisplayedRowCount] = useState(7);
   const [expandedRows, setExpandedRows] = useState<Set<any>>(new Set());
+  const { token } = useFirebaseAuth();
 
   // Functions
   const loadMoreRows = () => {
@@ -62,7 +64,11 @@ const Table: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/get-applications");
+      const response = await fetch("/api/get-applications", {
+        headers: {
+          ...(token && { "x-firebase-auth": token }),
+        },
+      });
   
       if (!response.ok) {
         throw new Error(`An error occurred: ${response.statusText}`);
