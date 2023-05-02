@@ -17,21 +17,21 @@ const PostPolicy = () => {
 
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-
+    
         try {
-            const response = await fetch('/api/submit-policy', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_LULA_API_URL}/policy/${accountEntityId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token && { 'x-firebase-auth': token }),
                 },
                 body: JSON.stringify({
-                    accountEntityId,
-                    deductible,
+                    policyNumber,
                     limit,
-                    policyNumber
+                    deductible,
                 }),
             });
-
+    
             if (response.ok) {
                 alert('Policy submitted successfully!');
                 const newRequest = `Submitted: ${accountEntityId} - ${policyNumber} - ${limit} - ${deductible}`;
@@ -45,6 +45,7 @@ const PostPolicy = () => {
             alert('An error occurred while submitting the policy. Please try again.');
         }
     };
+    
 
 
     const clearForm = () => {
