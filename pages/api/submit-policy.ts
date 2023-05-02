@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 async function submitPolicy(accountEntityId: string, policyNumber: string, limit: string, deductible: string, token?: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_LULA_API_URL}/policy/${accountEntityId}`, {
+  const response = await fetch(`${process.env.LULA_API_URL}/policy/${accountEntityId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
