@@ -34,6 +34,8 @@ const PostPolicy = () => {
     
             if (response.ok) {
                 alert('Policy submitted successfully!');
+                const newRequest = `Submitted: ${accountEntityId} - ${policyNumber} - ${limit} - ${deductible}`;
+                setRecentRequests((prev) => [newRequest, ...prev.slice(0, 9)]);
                 clearForm();
             } else {
                 alert('Failed to submit the policy. Please try again.');
