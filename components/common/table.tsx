@@ -12,7 +12,6 @@ const Table: React.FC = () => {
 
   // State variables
   const [data, setData] = useState<TableRow[]>([]);
-  const [rawData, setRawData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<TableRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
@@ -69,44 +68,38 @@ const Table: React.FC = () => {
           ...(token && { "x-firebase-auth": token }),
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(`An error occurred: ${response.statusText}`);
       }
-  
-      const rawData = await response.json();
-      setRawData(rawData);
-  
+
+      let rawData = await response.json();
+      rawData = rawData.items;
       const formattedData: TableRow[] = rawData.map((item: any) => {
-        const {
-          id,
-          createdOn,
-          status,
-          content,
-          insuranceProgram,
-          requester,
-        } = item;
-  
+        const applicationData = item.applicationData || {};
+        const contactName = `${applicationData.firstName || ''} ${applicationData.lastName || ''}`;
+        
         return {
-          id,
-          createdDate: new Date(createdOn),
-          status,
-          businessName: content.asJson.businessName || '',
-          contactName: `${content.asJson.applicant?.firstName || ''} ${content.asJson.applicant?.lastName || ''}`.trim(),
-          insuranceProgram: insuranceProgram.name,
-          source: requester.source,
-          contactEmail: content.asJson.applicant?.email || '',
-          contactPhone: content.asJson.applicant?.phone || '',
+          id: item.id,
+          createdDate: new Date(item.createdOn),
+          status: item.status,
+          businessName: applicationData.businessName || '',
+          contactName,
+          insuranceProgram: item.insuranceProgramName,
+          source: item.source,
+          contactEmail: applicationData.email || '',
+          contactPhone: applicationData.phoneNumber || '',
         };
       });
+      
+
       setData(formattedData);
     } catch (error: any) {
-      console.error('Error fetching data:', error.message);
+      console.error("Error fetching data:", error.message);
       // Set data to an empty array if fetch fails
       setData([]);
     }
   };
-  
 
   useEffect(() => {
     fetchData();
@@ -114,7 +107,7 @@ const Table: React.FC = () => {
 
   const navigateToApplicantDetailPage = (row: TableRow) => {
     router.push({
-      pathname: "/application/detail",
+      pathname: "/applications/detail",
       query: { id: row.id },
     });
   };
@@ -180,7 +173,7 @@ const Table: React.FC = () => {
   // Update application status
   const updateApplicationStatus = async (id: string, status: string) => {
     try {
-        await axios.post("/api/set-application-status", {
+      await axios.post("/api/set-application-status", {
         id,
         status,
       });
@@ -349,7 +342,7 @@ const Table: React.FC = () => {
                 <td className="px-4 py-2">{row.insuranceProgram}</td>
                 <td className="px-4 py-2">{row.source}</td>
                 <td className="px-4 py-2" onClick={() => toggleRowExpanded(String(row.id))}>
-                  <div className={` grid place-content-center cursor-pointer text-primary-dimmed hover:text-primary transition-all duration-300 ${expandedRows.has(row.id) ? 'transform -rotate-180 text-primary' : ''}`}>
+                  <div className={`grid place-content-center cursor-pointer text-primary-dimmed hover:text-primary transition-all duration-300 ${expandedRows.has(row.id) ? 'transform -rotate-180 text-primary' : ''}`}>
                     <Icon
                       icon="chevron-down solid"
                       size={ICON_SIZES.XXL}
@@ -382,19 +375,19 @@ const Table: React.FC = () => {
                         </p>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md mt-1 mr-2"
-                          onClick={()=>{updateApplicationStatus(String(row.id), "Approved")}}
+                          onClick={() => { updateApplicationStatus(String(row.id), "Approved") }}
                         >
                           Approve
                         </button>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md mr-2"
-                          onClick={()=>{updateApplicationStatus(String(row.id), "Rejected")}}
+                          onClick={() => { updateApplicationStatus(String(row.id), "Rejected") }}
                         >
                           Decline
                         </button>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
-                          onClick={()=>{updateApplicationStatus(String(row.id), "Incomplete")}}
+                          onClick={() => { updateApplicationStatus(String(row.id), "Incomplete") }}
                         >
                           Request More Info
                         </button></div>
@@ -417,17 +410,6 @@ const Table: React.FC = () => {
                 key={`empty-row-${i}`}
                 className="table-row w-full font-normal overflow-hidden relative"
               >
-                <div
-                  className={`w-full inset-0 z-10 bg-black dark:bg-white`}
-                  style={{ opacity: Math.random() * 0.05 }}
-                ></div>
-
-
-                {Array.from({ length: displayedRowCount }, (_, i) => (
-                  <td key={`empty-cell-${i}`} className="px-4 py-3">
-                    <div className="w-full h-full">&nbsp;</div>
-                  </td>
-                ))}
               </tr>
             ))}
         </tbody>
