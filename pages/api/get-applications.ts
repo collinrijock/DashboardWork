@@ -1,22 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-async function fetchSearchResults(queryParams: string, req: NextApiRequest) {
-  const token = String(req.headers["x-firebase-auth"]);
-  const response = await fetch(
-    `https://api.staging-lula.is/embedded/v1/backoffice/search?${queryParams}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { 'X-Firebase-Auth': token })
-      },
+async function fetchSearchResults(searchValue: string, req: NextApiRequest) {
+  try {
+    const token = String(req.headers["x-firebase-auth"]);
+    const url = `${process.env.LULA_API_URL}/embedded/v1/backoffice/search?search=${encodeURIComponent(searchValue)}&sortDirection=desc`;
+    const response = await fetch(
+      url,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { 'x-firebase-auth': token })
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`An error occurred: ${response.statusText}`);
     }
-  );
 
-  if (!response.ok) {
-    throw new Error(`An error occurred: ${response.statusText}`);
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching search results: ${error}`);
+    throw error;
   }
-
-  return await response.json();
 }
 
 export default async function handler(
@@ -24,10 +30,11 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const queryParams = req.url?.split("?")[1] || "";
-    const searchResults = await fetchSearchResults(queryParams, req);
+    const searchValue = req.query.search as string;
+    const searchResults = await fetchSearchResults(searchValue, req);
     res.status(200).json(searchResults);
-  } catch (error : any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: any) {
+    console.error(`Error processing search request: ${error}`);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 }

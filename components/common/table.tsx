@@ -63,7 +63,7 @@ const Table: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/get-applications", {
+      const response = await fetch(`/api/get-applications?search=${search}&sortDirection=desc`, {
         headers: {
           ...(token && { "x-firebase-auth": token }),
         },
