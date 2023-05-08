@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 async function fetchSearchResults(searchValue: string, req: NextApiRequest) {
   try {
     const token = String(req.headers["x-firebase-auth"]);
-    const url = `https://api.staging-lula.is/embedded/v1/backoffice/search?search=${encodeURIComponent(searchValue)}&sortDirection=desc`;
+    const url = `${process.env.LULA_API_URL}/embedded/v1/backoffice/search?search=${encodeURIComponent(searchValue)}&sortDirection=desc`;
     const response = await fetch(
       url,
       {
