@@ -46,28 +46,9 @@ interface Application {
   source: string;
 }
 
-const ApplicationDetail = () => {
+  const ApplicationDetail = ({ application }: { application: Application | null }) => {
   const router = useRouter();
-  const [application, setApplication] = useState<Application | null>(null);
   const { id } = router.query;
-  const { token } = useFirebaseAuth();
-
-  useEffect(() => {
-    if (id) {
-      axios
-        .get(`/api/single-application?id=${id}`, {
-          headers: {
-            ...(token && { "x-firebase-auth": token }),
-          },
-        })
-        .then((response) => {
-          setApplication(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  }, [id]);
 
   const sectionsConfig: Section[] = [
     {
@@ -112,11 +93,27 @@ const ApplicationDetail = () => {
 
 
   if (!id || !application) {
-    return <div>Missing data</div>;
+    return <div>
+      <Head>
+        <title>Not Found</title>
+      </Head>
+      <div className="bg-secondary">
+        <button onClick={() => router.back()} className="bg-primary hover:bg-primary-hover p-2 m-4 rounded">
+          Back
+        </button>
+        <div className="container mx-auto p-4">
+          <h1 className="w-full text-6xl p-2">Application Details</h1>
+          <p>Missing data</p>
+        </div>
+      </div>
+    </div>;
   }
 
   return (
     <div className="bg-secondary">
+      <Head>
+        <title>Applicant Details</title>
+      </Head>
       <button onClick={() => router.back()} className="bg-primary hover:bg-primary-hover p-2 m-4 rounded">
         Back
       </button>
@@ -142,10 +139,30 @@ const ApplicationDetail = () => {
                 );
               })}
             </div>
-          )) : <p>Missing data</p>
+          )) : <div>Missing data</div>
         }
       </div>
     </div>
   );
-};  
+};
+
+export async function getServerSideProps(context : any) {
+  const { id } = context.query;
+  const token = context.req.headers['x-firebase-auth'];
+
+  const url = `${process.env.LULA_API_URL}/embedded/v1/application/${id}`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        ...(token && { 'x-firebase-auth': token })
+      },
+    });
+    return { props: { application: response.data } };
+  } catch (error : any) {
+    console.error('Error fetching application:', error.message);
+    return { props: { application: null } };
+  }
+}
+
 export default ApplicationDetail;
