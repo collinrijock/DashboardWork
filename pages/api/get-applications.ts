@@ -8,7 +8,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const queryParams = new URLSearchParams(req.query as { [key: string]: string });
 
     const url = `${process.env.LULA_API_URL}/embedded/v1/backoffice/search?${queryParams}`;
-    console.log(`Making request to ${url}`);
     const response = await fetch(
       url,
       {

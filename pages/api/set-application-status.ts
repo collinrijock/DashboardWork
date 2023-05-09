@@ -4,7 +4,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const token = String(req.headers["x-firebase-auth"]);
-    console.log('token', token);
     const response = await axios({
       method: 'post',
       url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/statusupdate`,
