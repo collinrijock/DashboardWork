@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "tailwindcss/tailwind.css";
 import { useRouter } from "next/router";
 import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
@@ -12,8 +12,6 @@ const Table: React.FC = () => {
 
   // State variables
   const [data, setData] = useState<TableRow[]>([]);
-  const [rawData, setRawData] = useState<any[]>([]);
-  const [filteredData, setFilteredData] = useState<TableRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterInsuranceProgram, setFilterInsuranceProgram] = useState("");
@@ -22,6 +20,7 @@ const Table: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<Set<any>>(new Set());
   const [displayedRowCount, setDisplayedRowCount] = useState(7);
   const [expandedRows, setExpandedRows] = useState<Set<any>>(new Set());
+  const [updatedRowIds, setUpdatedRowIds] = useState<Set<string>>(new Set());
   const { token } = useFirebaseAuth();
 
   // Functions
@@ -62,133 +61,110 @@ const Table: React.FC = () => {
     setExpandedRows(new Set());
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async (
+    search: string,
+    filterDate: string,
+    filterInsuranceProgram: string,
+    filterStatus: string,
+    filterSource: string
+  ) => {
     try {
-      const response = await fetch(`/api/get-applications?search=${search}&sortDirection=desc`, {
-        headers: {
-          ...(token && { "x-firebase-auth": token }),
-        },
-      });      
-  
+      const queryParams = new URLSearchParams({
+        search: search,
+        sortDirection: "desc",
+        ...filterDate && { createdOn: filterDate },
+        ...filterInsuranceProgram && { programName: filterInsuranceProgram },
+        ...filterStatus && { status: filterStatus },
+        ...filterSource && { source: filterSource },
+      });
+
+      let headers: HeadersInit = {};
+      if (token) {
+        headers = {
+          "x-firebase-auth": token,
+        };
+      }
+
+      const response = await fetch(`/api/get-applications?${queryParams}`, {
+        headers: headers,
+      });
+
       if (!response.ok) {
         throw new Error(`An error occurred: ${response.statusText}`);
       }
-  
-      const rawData = await response.json();
-      setRawData(rawData);
-  
+
+      let rawData = await response.json();
+      rawData = rawData.items;
       const formattedData: TableRow[] = rawData.map((item: any) => {
-        const {
-          id,
-          createdOn,
-          status,
-          content,
-          insuranceProgram,
-          requester,
-        } = item;
-  
+        const applicationData = item.applicationData || {};
+        const contactName = `${applicationData.firstName || ""} ${applicationData.lastName || ""
+          }`;
+
         return {
-          id,
-          createdDate: new Date(createdOn),
-          status,
-          businessName: content.asJson.businessName || '',
-          contactName: `${content.asJson.applicant?.firstName || ''} ${content.asJson.applicant?.lastName || ''}`.trim(),
-          insuranceProgram: insuranceProgram.name,
-          source: requester.source,
-          contactEmail: content.asJson.applicant?.email || '',
-          contactPhone: content.asJson.applicant?.phone || '',
+          id: item.id,
+          createdDate: new Date(item.createdOn),
+          status: item.status,
+          businessName: applicationData.businessName || "",
+          contactName,
+          insuranceProgram: item.insuranceProgramName,
+          source: item.source,
+          contactEmail: applicationData.email || "",
+          contactPhone: applicationData.phoneNumber || "",
         };
       });
       setData(formattedData);
+      setUpdatedRowIds(new Set());
+
     } catch (error: any) {
-      console.error('Error fetching data:', error.message);
-      // Set data to an empty array if fetch fails
+      console.error("Error fetching data:", error.message);
       setData([]);
     }
-  };
-  
+  }, [token]);
+
+
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData(
+        search,
+        filterDate,
+        filterInsuranceProgram,
+        filterStatus,
+        filterSource
+      );
+    }
+  }, [fetchData, search, filterDate, filterInsuranceProgram, filterStatus, filterSource, token]);
 
   const navigateToApplicantDetailPage = (row: TableRow) => {
     router.push({
-      pathname: "/application/detail",
+      pathname: "/applications/detail",
       query: { id: row.id },
     });
   };
 
-  // Filtering and sorting
-  useEffect(() => {
-    const filterAndSortData = () => {
-      let filtered = data;
-
-      // Apply search filter
-      if (search) {
-        const lowerSearch = search.toLowerCase();
-        filtered = filtered.filter(
-          (row) =>
-            row.businessName.toLowerCase().includes(lowerSearch) ||
-            row.contactName.toLowerCase().includes(lowerSearch) ||
-            row.contactEmail.toLowerCase().includes(lowerSearch) ||
-            row.contactPhone.toLowerCase().includes(lowerSearch)
-        );
-      }
-
-      // Apply date filter
-      if (filterDate) {
-        const selectedDate = new Date(filterDate);
-        selectedDate.setMinutes(
-          selectedDate.getMinutes() + selectedDate.getTimezoneOffset()
-        );
-        filtered = filtered.filter((row) => {
-          const rowCreatedDate = new Date(row.createdDate);
-          rowCreatedDate.setHours(0, 0, 0, 0);
-          return rowCreatedDate.getTime() === selectedDate.getTime();
-        });
-      }
-
-      // Apply insurance program filter
-      if (filterInsuranceProgram) {
-        filtered = filtered.filter(
-          (row) => row.insuranceProgram === filterInsuranceProgram
-        );
-      }
-
-      // Apply status filter
-      if (filterStatus) {
-        filtered = filtered.filter((row) => row.status === filterStatus);
-      }
-
-      // Apply source filter
-      if (filterSource) {
-        filtered = filtered.filter((row) => row.source === filterSource);
-      }
-
-      // Sort by created date
-      filtered.sort(
-        (a, b) => a.createdDate.getTime() - b.createdDate.getTime()
-      );
-
-      setFilteredData(filtered);
-    };
-
-    filterAndSortData();
-  }, [search, filterDate, filterInsuranceProgram, filterStatus, filterSource, data]);
-
-  // Update application status
   const updateApplicationStatus = async (id: string, status: string) => {
     try {
-        await axios.post("/api/set-application-status", {
+      let headers: HeadersInit = {};
+      if (token) {
+        headers = {
+          "x-firebase-auth": token,
+        };
+      }
+      await axios.post("/api/set-application-status", {
         id,
         status,
+      }, {
+        headers
       });
-      fetchData();
+
+      setUpdatedRowIds(new Set([...updatedRowIds, id]));
+
+      fetchData(search, filterDate, filterInsuranceProgram, filterStatus, filterSource);
     } catch (error: any) {
       console.error("Failed to update status:", error.message);
     }
   };
+
 
   // Actions on selected rows
   const approveSelectedRows = () => {
@@ -197,7 +173,7 @@ const Table: React.FC = () => {
     }
   };
 
-  const declineSelectedRows = () => {
+  const rejectSelectedRows = () => {
     for (const applicationId of Array.from(selectedRows)) {
       updateApplicationStatus(applicationId, "Rejected");
     }
@@ -251,7 +227,7 @@ const Table: React.FC = () => {
           <option value="New">New</option>
           <option value="Incomplete">Incomplete</option>
           <option value="Approved">Approved</option>
-          <option value="Rejected">Declined</option>
+          <option value="Rejected">Rejected</option>
         </select>
         <select
           className="w-full border-none p-2 rounded bg-primary text-sm"
@@ -285,9 +261,9 @@ const Table: React.FC = () => {
           </button>
           <button
             className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
-            onClick={declineSelectedRows}
+            onClick={rejectSelectedRows}
           >
-            Decline selected
+            Reject selected
           </button>
           <button
             className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
@@ -307,7 +283,7 @@ const Table: React.FC = () => {
                 onChange={(e) => {
                   const isChecked = e.target.checked;
                   const newRowSelection = isChecked
-                    ? new Set(filteredData.map((row) => row.id))
+                    ? new Set(data.map((row) => row.id))
                     : new Set();
                   setSelectedRows(newRowSelection);
                 }}
@@ -325,7 +301,7 @@ const Table: React.FC = () => {
         </thead>
         <tbody>
           {/* normal row */}
-          {filteredData.slice(0, displayedRowCount).map((row, index) => (
+          {data.slice(0, displayedRowCount).map((row, index) => (
             <React.Fragment key={row.id}>
               <tr
                 key={row.id}
@@ -343,13 +319,16 @@ const Table: React.FC = () => {
                   />
                 </td>
                 <td className="px-4 py-2">{row.createdDate.toDateString()}</td>
-                <td className="px-4 py-2">{row.status}</td>
+                <td className={`px-4 py-2 ${updatedRowIds.has(String(row.id)) ? "bg-briefly-changed" : ""}`}>
+                  {row.status}
+                </td>
+
                 <td className="px-4 py-2">{row.businessName}</td>
                 <td className="px-4 py-2">{row.contactName}</td>
                 <td className="px-4 py-2">{row.insuranceProgram}</td>
                 <td className="px-4 py-2">{row.source}</td>
                 <td className="px-4 py-2" onClick={() => toggleRowExpanded(String(row.id))}>
-                  <div className={` grid place-content-center cursor-pointer text-primary-dimmed hover:text-primary transition-all duration-300 ${expandedRows.has(row.id) ? 'transform -rotate-180 text-primary' : ''}`}>
+                  <div className={`grid place-content-center cursor-pointer text-primary-dimmed hover:text-primary transition-all duration-300 ${expandedRows.has(row.id) ? 'transform -rotate-180 text-primary' : ''}`}>
                     <Icon
                       icon="chevron-down solid"
                       size={ICON_SIZES.XXL}
@@ -382,19 +361,19 @@ const Table: React.FC = () => {
                         </p>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md mt-1 mr-2"
-                          onClick={()=>{updateApplicationStatus(String(row.id), "Approved")}}
+                          onClick={() => { updateApplicationStatus(String(row.id), "Approved") }}
                         >
                           Approve
                         </button>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md mr-2"
-                          onClick={()=>{updateApplicationStatus(String(row.id), "Rejected")}}
+                          onClick={() => { updateApplicationStatus(String(row.id), "Rejected") }}
                         >
-                          Decline
+                          Reject
                         </button>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
-                          onClick={()=>{updateApplicationStatus(String(row.id), "Incomplete")}}
+                          onClick={() => { updateApplicationStatus(String(row.id), "Incomplete") }}
                         >
                           Request More Info
                         </button></div>
@@ -411,28 +390,17 @@ const Table: React.FC = () => {
             </React.Fragment>
           ))}
           {/* empty row */}
-          {filteredData.length == 0 &&
-            Array.from({ length: displayedRowCount - filteredData.length }, (_, i) => (
+          {data.length == 0 &&
+            Array.from({ length: displayedRowCount - data.length }, (_, i) => (
               <tr
                 key={`empty-row-${i}`}
                 className="table-row w-full font-normal overflow-hidden relative"
               >
-                <div
-                  className={`w-full inset-0 z-10 bg-black dark:bg-white`}
-                  style={{ opacity: Math.random() * 0.05 }}
-                ></div>
-
-
-                {Array.from({ length: displayedRowCount }, (_, i) => (
-                  <td key={`empty-cell-${i}`} className="px-4 py-3">
-                    <div className="w-full h-full">&nbsp;</div>
-                  </td>
-                ))}
               </tr>
             ))}
         </tbody>
         {
-          filteredData.length > displayedRowCount && (
+          data.length > displayedRowCount && (
             <tfoot>
               <tr>
                 <td colSpan={8} className="text-center p-4">
