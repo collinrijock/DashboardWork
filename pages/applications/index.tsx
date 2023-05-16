@@ -1,5 +1,5 @@
 // pages/applications/index.tsx
-import Table from '@/components/common/table';
+import Table from '@/components/table';
 import Head from 'next/head';
 
 const Applications = () => {
