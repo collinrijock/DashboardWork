@@ -2,15 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import "tailwindcss/tailwind.css";
 import { useRouter } from "next/router";
 import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
-import { TableRow } from "../../types/TableRow";
+import { TableRow } from "../types/TableRow";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import axios from "axios";
-
 const Table: React.FC = () => {
   // Router
-  const router = useRouter();
-
-  // State variables
+  const router = useRouter(); // State variables
   const [data, setData] = useState<TableRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
@@ -22,31 +19,27 @@ const Table: React.FC = () => {
   const [expandedRows, setExpandedRows] = useState<Set<any>>(new Set());
   const [updatedRowIds, setUpdatedRowIds] = useState<Set<string>>(new Set());
   const { token } = useFirebaseAuth();
+  const [firstLoad, setFirstLoad] = useState(true);
 
   // Functions
   const loadMoreRows = () => {
     setDisplayedRowCount(displayedRowCount + 7);
   };
-
   const clearFilters = () => {
     setSearch("");
     setFilterDate("");
     setFilterInsuranceProgram("");
     setFilterStatus("");
   };
-
   const handleRowSelection = (id: string, isChecked: boolean) => {
     const newSelectedRows = new Set(selectedRows);
-
     if (isChecked) {
       newSelectedRows.add(id);
     } else {
       newSelectedRows.delete(id);
     }
-
     setSelectedRows(newSelectedRows);
   };
-
   const toggleRowExpanded = (id: string) => {
     const newExpandedRows = new Set(expandedRows);
     if (expandedRows.has(id)) {
@@ -56,84 +49,94 @@ const Table: React.FC = () => {
     }
     setExpandedRows(newExpandedRows);
   };
-
   const collapseAllRows = () => {
     setExpandedRows(new Set());
   };
-
-  const fetchData = useCallback(async (
-    search: string,
-    filterDate: string,
-    filterInsuranceProgram: string,
-    filterStatus: string,
-    filterSource: string
-  ) => {
-    try {
-      const queryParams = new URLSearchParams({
-        search: search,
-        sortDirection: "desc",
-        ...filterDate && { createdOn: filterDate },
-        ...filterInsuranceProgram && { programName: filterInsuranceProgram },
-        ...filterStatus && { status: filterStatus },
-        ...filterSource && { source: filterSource },
-      });
-
-      let headers: HeadersInit = {};
-      if (token) {
-        headers = {
-          "x-firebase-auth": token,
-        };
+  const fetchData = useCallback(
+    async (
+      search: string,
+      filterDate: string,
+      filterInsuranceProgram: string,
+      filterStatus: string,
+      filterSource: string
+    ) => {
+      try {
+        const queryParams = new URLSearchParams({
+          search: search,
+          sortDirection: "desc",
+          ...(filterDate && { createdOn: filterDate }),
+          ...(filterInsuranceProgram && {
+            programName: filterInsuranceProgram,
+          }),
+          ...(filterStatus && { status: filterStatus }),
+          ...(filterSource && { source: filterSource }),
+        });
+        let headers: HeadersInit = {};
+        if (token) {
+          headers = {
+            "x-firebase-auth": token,
+          };
+        }
+        const response = await fetch(`/api/get-applications?${queryParams}`, {
+          headers: headers,
+        });
+        if (!response.ok) {
+          throw new Error(`An error occurred: ${response.statusText}`);
+        }
+        let rawData = await response.json();
+        rawData = rawData.items;
+        const formattedData: TableRow[] = rawData.map((item: any) => {
+          const applicationData = item.applicationData || {};
+          const contactName = `${applicationData.firstName || ""} ${applicationData.lastName || ""
+            }`;
+          return {
+            id: item.id,
+            createdDate: new Date(item.createdOn),
+            status: item.status,
+            businessName: applicationData.businessName || "",
+            contactName,
+            insuranceProgram: item.insuranceProgramName,
+            source: item.source,
+            contactEmail: applicationData.email || "",
+            contactPhone: applicationData.phoneNumber || "",
+          };
+        });
+        setData(formattedData);
+        setUpdatedRowIds(new Set());
+      } catch (error: any) {
+        console.error("Error fetching data:", error.message);
+        setData([]);
       }
-
-      const response = await fetch(`/api/get-applications?${queryParams}`, {
-        headers: headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`An error occurred: ${response.statusText}`);
-      }
-
-      let rawData = await response.json();
-      rawData = rawData.items;
-      const formattedData: TableRow[] = rawData.map((item: any) => {
-        const applicationData = item.applicationData || {};
-        const contactName = `${applicationData.firstName || ""} ${applicationData.lastName || ""
-          }`;
-
-        return {
-          id: item.id,
-          createdDate: new Date(item.createdOn),
-          status: item.status,
-          businessName: applicationData.businessName || "",
-          contactName,
-          insuranceProgram: item.insuranceProgramName,
-          source: item.source,
-          contactEmail: applicationData.email || "",
-          contactPhone: applicationData.phoneNumber || "",
-        };
-      });
-      setData(formattedData);
-      setUpdatedRowIds(new Set());
-
-    } catch (error: any) {
-      console.error("Error fetching data:", error.message);
-      setData([]);
-    }
-  }, [token]);
-
-
+    },
+    [token]
+  );
 
   useEffect(() => {
     if (token) {
-      fetchData(
-        search,
-        filterDate,
-        filterInsuranceProgram,
-        filterStatus,
-        filterSource
-      );
+      // If it's the first load, fetch immediately and set firstLoad to false
+      if (firstLoad) {
+        fetchData(search, filterDate, filterInsuranceProgram, filterStatus, filterSource);
+        setFirstLoad(false);
+      } else {
+        // If not the first load, then add the debounce
+        const timeoutId = window.setTimeout(() => {
+          fetchData(search, filterDate, filterInsuranceProgram, filterStatus, filterSource);
+        }, 300); // 100ms delay
+
+        // Cleanup function to clear timeout if effect re-runs before timeout finishes
+        return () => window.clearTimeout(timeoutId);
+      }
     }
-  }, [fetchData, search, filterDate, filterInsuranceProgram, filterStatus, filterSource, token]);
+  }, [
+    fetchData,
+    search,
+    filterDate,
+    filterInsuranceProgram,
+    filterStatus,
+    filterSource,
+    token,
+    firstLoad,
+  ]);
 
   const navigateToApplicantDetailPage = (row: TableRow) => {
     router.push({
@@ -141,7 +144,6 @@ const Table: React.FC = () => {
       query: { id: row.id },
     });
   };
-
   const updateApplicationStatus = async (id: string, status: string) => {
     try {
       let headers: HeadersInit = {};
@@ -150,41 +152,38 @@ const Table: React.FC = () => {
           "x-firebase-auth": token,
         };
       }
-      await axios.post("/api/set-application-status", {
-        id,
-        status,
-      }, {
-        headers
-      });
-
+      await axios.post(
+        "/api/set-application-status",
+        { id, status }, { headers }
+      );
       setUpdatedRowIds(new Set([...updatedRowIds, id]));
-
-      fetchData(search, filterDate, filterInsuranceProgram, filterStatus, filterSource);
+      fetchData(
+        search,
+        filterDate,
+        filterInsuranceProgram,
+        filterStatus,
+        filterSource
+      );
     } catch (error: any) {
       console.error("Failed to update status:", error.message);
     }
   };
-
-
   // Actions on selected rows
   const approveSelectedRows = () => {
     for (const applicationId of Array.from(selectedRows)) {
       updateApplicationStatus(applicationId, "Approved");
     }
   };
-
   const rejectSelectedRows = () => {
     for (const applicationId of Array.from(selectedRows)) {
       updateApplicationStatus(applicationId, "Rejected");
     }
   };
-
   const requestMoreInfoSelectedRows = () => {
     for (const applicationId of Array.from(selectedRows)) {
       updateApplicationStatus(applicationId, "Request_more_info");
     }
   };
-
   return (
     <div className="font-sans py-4">
       <div className="grid grid-cols-3 gap-4 mb-4">
@@ -289,12 +288,24 @@ const Table: React.FC = () => {
                 }}
               />
             </th>
-            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">CREATED</th>
-            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">STATUS</th>
-            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">BUSINESS</th>
-            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal" >CONTACT</th>
-            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">PROGRAM</th>
-            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">SOURCE</th>
+            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              CREATED
+            </th>
+            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              STATUS
+            </th>
+            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              BUSINESS
+            </th>
+            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              CONTACT
+            </th>
+            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              PROGRAM
+            </th>
+            <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
+              SOURCE
+            </th>
             <th className="p-4 text-end"></th>
             <th className="p-4 text-end"></th>
           </tr>
@@ -319,23 +330,35 @@ const Table: React.FC = () => {
                   />
                 </td>
                 <td className="px-4 py-2">{row.createdDate.toDateString()}</td>
-                <td className={`px-4 py-2 ${updatedRowIds.has(String(row.id)) ? "bg-briefly-changed" : ""}`}>
+                <td
+                  className={`px-4 py-2 ${updatedRowIds.has(String(row.id))
+                      ? "bg-briefly-changed"
+                      : ""
+                    }`}
+                >
                   {row.status}
                 </td>
-
                 <td className="px-4 py-2">{row.businessName}</td>
                 <td className="px-4 py-2">{row.contactName}</td>
                 <td className="px-4 py-2">{row.insuranceProgram}</td>
                 <td className="px-4 py-2">{row.source}</td>
-                <td className="px-4 py-2" onClick={() => toggleRowExpanded(String(row.id))}>
-                  <div className={`grid place-content-center cursor-pointer text-primary-dimmed hover:text-primary transition-all duration-300 ${expandedRows.has(row.id) ? 'transform -rotate-180 text-primary' : ''}`}>
-                    <Icon
-                      icon="chevron-down solid"
-                      size={ICON_SIZES.XXL}
-                    />
+                <td
+                  className="px-4 py-2"
+                  onClick={() => toggleRowExpanded(String(row.id))}
+                >
+                  <div
+                    className={`grid place-content-center cursor-pointer text-primary-dimmed hover:text-primary transition-all duration-300 ${expandedRows.has(row.id)
+                        ? "transform -rotate-180 text-primary"
+                        : ""
+                      }`}
+                  >
+                    <Icon icon="chevron-down solid" size={ICON_SIZES.XXL} />
                   </div>
                 </td>
-                <td className="px-4 py-2" onClick={() => navigateToApplicantDetailPage(row)}>
+                <td
+                  className="px-4 py-2"
+                  onClick={() => navigateToApplicantDetailPage(row)}
+                >
                   <Icon
                     icon="arrow-right-to-line solid"
                     className="cursor-pointer mr-1 text-primary-dimmed hover:text-primary"
@@ -348,11 +371,14 @@ const Table: React.FC = () => {
                   <td colSpan={10} className="p-4">
                     <div
                       className="overflow-hidden p-2 flex flex-row"
-                      style={{ maxHeight: expandedRows.has(row.id) ? "10rem" : "0" }}
+                      style={{
+                        maxHeight: expandedRows.has(row.id) ? "10rem" : "0",
+                      }}
                     >
-                      <div><p>
-                        Business Name: <strong>{row.businessName}</strong>
-                      </p>
+                      <div>
+                        <p>
+                          Business Name: <strong>{row.businessName}</strong>
+                        </p>
                         <p>
                           Contact Email: <strong>{row.contactEmail}</strong>
                         </p>
@@ -361,29 +387,36 @@ const Table: React.FC = () => {
                         </p>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md mt-1 mr-2"
-                          onClick={() => { updateApplicationStatus(String(row.id), "Approved") }}
+                          onClick={() => {
+                            updateApplicationStatus(String(row.id), "Approved");
+                          }}
                         >
                           Approve
                         </button>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md mr-2"
-                          onClick={() => { updateApplicationStatus(String(row.id), "Rejected") }}
+                          onClick={() => {
+                            updateApplicationStatus(String(row.id), "Rejected");
+                          }}
                         >
                           Reject
                         </button>
                         <button
                           className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
-                          onClick={() => { updateApplicationStatus(String(row.id), "Incomplete") }}
+                          onClick={() => {
+                            updateApplicationStatus(
+                              String(row.id),
+                              "Incomplete"
+                            );
+                          }}
                         >
                           Request More Info
-                        </button></div>
+                        </button>
+                      </div>
                       <div>
-
                         <p>Documents:</p>
                       </div>
-
                     </div>
-
                   </td>
                 </tr>
               )}
@@ -395,29 +428,25 @@ const Table: React.FC = () => {
               <tr
                 key={`empty-row-${i}`}
                 className="table-row w-full font-normal overflow-hidden relative"
-              >
-              </tr>
+              ></tr>
             ))}
         </tbody>
-        {
-          data.length > displayedRowCount && (
-            <tfoot>
-              <tr>
-                <td colSpan={8} className="text-center p-4">
-                  <button
-                    className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
-                    onClick={loadMoreRows}
-                  >
-                    Load more data
-                  </button>
-                </td>
-              </tr>
-            </tfoot>
-          )
-        }
+        {data.length > displayedRowCount && (
+          <tfoot>
+            <tr>
+              <td colSpan={8} className="text-center p-4">
+                <button
+                  className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
+                  onClick={loadMoreRows}
+                >
+                  Load more data
+                </button>
+              </td>
+            </tr>
+          </tfoot>
+        )}
       </table>
     </div>
   );
 };
-
 export default Table;

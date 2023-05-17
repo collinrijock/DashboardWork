@@ -9,6 +9,7 @@ const PostPolicy = () => {
     const [deductible, setDeductible] = useState('');
     const [recentRequests, setRecentRequests] = useState<string[]>([]);
     const { token } = useFirebaseAuth();
+    const [loading, setLoading] = useState(false);
 
     const handleNumberInput = (event: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
         const formattedValue = event.target.value.replace(/,/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -17,7 +18,7 @@ const PostPolicy = () => {
 
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-
+        setLoading(true);
         try {
             const response = await fetch("/api/submit-policy", {
                 method: "POST",
@@ -35,7 +36,7 @@ const PostPolicy = () => {
 
             if (response.ok) {
                 alert("Policy submitted successfully!");
-                const newRequest = `Submitted: ${accountEntityId} - ${policyNumber} - ${limit} - ${deductible}`;
+                const newRequest = `${accountEntityId} - ${policyNumber} - ${limit} - ${deductible}`;
                 setRecentRequests((prev) => [newRequest, ...prev.slice(0, 9)]);
                 clearForm();
             } else {
@@ -44,6 +45,8 @@ const PostPolicy = () => {
         } catch (error) {
             console.error("Error submitting policy:", error);
             alert("An error occurred while submitting the policy. Please try again.");
+        } finally {
+            setLoading(false); // Set loading to false after the request is complete
         }
     };
 
@@ -111,8 +114,9 @@ const PostPolicy = () => {
                     <button
                         type="submit"
                         className="bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4"
+                        disabled={loading} // Disable the button if loading is true
                     >
-                        Submit
+                        {loading ? 'Submitting...' : 'Submit'}
                     </button>
                     <button
                         type="button"
@@ -123,14 +127,33 @@ const PostPolicy = () => {
                     </button>
                 </div>
             </form>
-            <div className="mt-12">
+            <div className="mt-12 p-8 bg-primary rounded-lg">
                 <h1 className="text-4xl mb-4">Recently Added</h1>
-                <ul>
-                    {recentRequests.map((request, index) => (
-                        <li key={index}>{request}</li>
-                    ))}
-                </ul>
+                <table className="table-auto w-full">
+                    <thead>
+                        <tr>
+                            <th className="px-4 py-2 font-normal text-left">Account Entity ID</th>
+                            <th className="px-4 py-2 font-normal text-left">Policy Number</th>
+                            <th className="px-4 py-2 font-normal text-left">Limit</th>
+                            <th className="px-4 py-2 font-normal text-left">Deductible</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {recentRequests.map((request, index) => {
+                            const [accountEntityId, policyNumber, limit, deductible] = request.split(' - ');
+                            return (
+                                <tr key={index}>
+                                    <td className="px-4 py-2 text-left">{accountEntityId}</td>
+                                    <td className="px-4 py-2 text-left">{policyNumber}</td>
+                                    <td className="px-4 py-2 text-left">{limit}</td>
+                                    <td className="px-4 py-2 text-left">{deductible}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
+
         </div >
     );
 };
