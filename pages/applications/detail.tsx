@@ -46,9 +46,13 @@ interface Application {
   source: string;
 }
 
-  const ApplicationDetail = ({ application }: { application: Application | null }) => {
-  const router = useRouter();
-  const { id } = router.query;
+  const ApplicationDetail = () => {
+    const router = useRouter();
+    const { id } = router.query;
+    const [application, setApplication] = useState<Application | null>(null);
+    const [loading, setLoading] = useState(true);
+    const { token } = useFirebaseAuth();
+
 
   const sectionsConfig: Section[] = [
     {
@@ -90,6 +94,24 @@ interface Application {
       ],
     },
   ];
+  useEffect(() => {
+    const fetchApplication = async () => {
+      try {
+        const response = await fetch(`/api/application-details?id=${id}&token=${token}`);
+        const data = await response.json();
+        setApplication(data);
+      } catch (error:any) {
+        console.error('Error fetching application:', error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  
+    if (token) {
+      fetchApplication();
+    }
+  }, [token, id]);
+
 
 
   if (!id || !application) {
@@ -145,24 +167,5 @@ interface Application {
     </div>
   );
 };
-
-export async function getServerSideProps(context : any) {
-  const { id } = context.query;
-  const token = context.req.headers['x-firebase-auth'];
-
-  const url = `${process.env.LULA_API_URL}/embedded/v1/application/${id}`;
-
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        ...(token && { 'x-firebase-auth': token })
-      },
-    });
-    return { props: { application: response.data } };
-  } catch (error : any) {
-    console.error('Error fetching application:', error.message);
-    return { props: { application: null } };
-  }
-}
 
 export default ApplicationDetail;
