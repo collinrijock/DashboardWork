@@ -61,7 +61,7 @@ export default function VehicleInfoPage() {
                   <button
                     key={check.externalId}
                     onClick={() => setCurrentIndex(index)}
-                    className={`block mb-2 p-4 border-primary-dimmed rounded-md cursor-pointer box-border ${currentIndex === index ? 'text-white bg-primary-highlighted border-2' : 'text-gray-600 bg-secondary'}`}
+                    className={`block mb-2 p-4 border-primary-dimmed rounded-md cursor-pointer box-border ${currentIndex === index ? 'bg-primary-highlighted border-2' : 'bg-secondary'}`}
                   >
                     {new Date(check.timestamp).toLocaleString()} - {check.status}
                   </button>
