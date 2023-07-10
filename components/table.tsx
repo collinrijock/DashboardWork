@@ -187,7 +187,7 @@ const Table: React.FC = () => {
   return (
     <div className="font-sans py-4">
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="relative w-full col-span-2 border-none px-2 bg-primary rounded-sm">
+        <div className="relative w-full col-span-2 border-none px-2 bg-primary rounded-sm flex flex-row items-center justify-center">
           <Icon
             icon="magnifying-glass"
             className="ml-1 fa-solid text-gray-500"
