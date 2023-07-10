@@ -190,12 +190,12 @@ const Table: React.FC = () => {
         <div className="relative w-full col-span-2 border-none px-2 bg-primary rounded-sm">
           <Icon
             icon="magnifying-glass"
-            className="absolute top-3 left-3.5 h-4 w-4 fa-solid text-gray-500"
+            className="ml-1 fa-solid text-gray-500"
           />
           <input
             type="text"
             placeholder="Search"
-            className="w-full box-border pl-10 pr-4 border-none bg-primary "
+            className="w-full box-border pl-6 pr-4 border-none bg-primary "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -203,7 +203,7 @@ const Table: React.FC = () => {
         <input
           type="date"
           placeholder="dd/mm/yyyy"
-          className="w-full border-none px-2 rounded bg-primary grid place-content-center"
+          className="w-full border-none px-2 rounded bg-primary"
           value={filterDate}
           onChange={(e) => setFilterDate(e.target.value)}
         />
