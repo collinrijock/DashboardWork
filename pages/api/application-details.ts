@@ -14,7 +14,7 @@ export default async function handler(req : any, res : any) {
 
     res.status(200).json(response.data);
   } catch (error:any) {
-    console.error('Error fetching application:', error.message);
+    console.error('Error fetching application:', error);
     res.status(500).json({ error: 'Error fetching application' });
   }
 }
