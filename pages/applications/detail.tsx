@@ -5,6 +5,8 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import axios from "axios";
 
 interface Address {
+  addressLine1: any;
+  addressLine2: any;
   street: string;
   city: string;
   state: string;
@@ -167,7 +169,13 @@ const ApplicationDetail = () => {
                 </div>
                 <div className="mt-4">
                   <label className="text-xs">Business Address</label>
-                  <p>{application.applicationData.businessAddress ? `${application.applicationData.businessAddress.addressLine1}, ${application.applicationData.businessAddress.city}, ${application.applicationData.businessAddress.state}, ${application.applicationData.businessAddress.zip}` : "Missing"}</p>
+                  <p>
+                    {application.applicationData.businessAddress ?
+                      `${application.applicationData?.businessAddress?.addressLine1}${application.applicationData.businessAddress?.addressLine2 ? ', ' + application.applicationData.businessAddress.addressLine2 : ''}, ${application.applicationData.businessAddress.city}, ${application.applicationData.businessAddress.state}, ${application.applicationData.businessAddress.zip}`
+                      : "Missing"
+                    }
+                  </p>
+
                 </div>
                 <div className="mt-4 flex flex-row">
                   <div>
