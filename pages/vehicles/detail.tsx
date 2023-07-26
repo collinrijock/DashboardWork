@@ -10,7 +10,7 @@ export default function VehicleInfoPage() {
   const { vin } = router.query;
 
   useEffect(() => {
-    const fetchUnderwritingChecks = async (vin : string, token : string) => {
+    const fetchUnderwritingChecks = async (vin: string, token: string) => {
       try {
         const res = await fetch(`/api/underwriting-details?vin=${vin}&token=${token}`);
         const data = await res.json();
@@ -26,12 +26,12 @@ export default function VehicleInfoPage() {
     }
   }, [vin, token]);
 
-  const formatDate = (dateString : string) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   };
 
-  const formatValue : any = (value : string) => {
+  const formatValue: any = (value: string) => {
     if (Array.isArray(value)) {
       return value.join(', ');
     } else if (typeof value === 'object' && value !== null) {
@@ -57,7 +57,7 @@ export default function VehicleInfoPage() {
             <div className="bg-primary p-2 rounded-md text-center flex flex-col items-center sticky top-8 shadow-md mt-4">
               <h2 className="text-xl font-serif mt-4 mb-2">Report History</h2>
               <div >
-                {underwritingChecks.map((check : any, index) => (
+                {underwritingChecks.map((check: any, index) => (
                   <button
                     key={check.externalId}
                     onClick={() => setCurrentIndex(index)}
@@ -78,7 +78,11 @@ export default function VehicleInfoPage() {
                 </div>
                 <div className="flex items-center my-2">
                   <span className="w-1/4 text-primary-dimmed uppercase tracking-widest">Source:</span>
-                  <span className="text-lg">{JSON.parse(currentCheck.input.rawValue).source}</span>
+                  <span className="text-lg">{
+                    typeof JSON.parse(currentCheck.input.rawValue).source === "string"
+                      ? JSON.parse(currentCheck.input.rawValue).source
+                      : Object.entries(JSON.parse(currentCheck.input.rawValue).source).map(([key, value]) => value)
+                  }</span>
                 </div>
                 <div className="flex items-center my-2">
                   <span className="w-1/4 text-primary-dimmed uppercase tracking-widest">Mileage:</span>
@@ -102,7 +106,7 @@ export default function VehicleInfoPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentCheck.executedRules.map((rule : any, index : number) => (
+                    {currentCheck.executedRules.map((rule: any, index: number) => (
                       <tr key={index} className="border-t border-primary-hover">
                         <td className="py-2 text-sm">
                           <span>{rule.name}</span>
@@ -130,7 +134,7 @@ export default function VehicleInfoPage() {
 
               {/* ExtraData */}
 
-              {currentCheck.extraData.map((data : any, index : number) => {
+              {currentCheck.extraData.map((data: any, index: number) => {
                 if (data.provider === "UserInput") {
                   return null; // Skip rendering UserInput section
                 }
@@ -151,7 +155,7 @@ export default function VehicleInfoPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {data.rawValue.titles.map((title : any, titleIndex : number) => (
+                            {data.rawValue.titles.map((title: any, titleIndex: number) => (
                               <tr key={titleIndex}>
                                 <td className="border py-1 px-2">{title.current.toString()}</td>
                                 <td className="border py-1 px-2">{title.date}</td>
@@ -173,7 +177,7 @@ export default function VehicleInfoPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {data.rawValue.jsi.map((jsiItem : any, jsiIndex : number) => (
+                            {data.rawValue.jsi.map((jsiItem: any, jsiIndex: number) => (
                               <tr key={jsiIndex}>
                                 <td className="border py-1 px-2">{jsiItem.date}</td>
                               </tr>
@@ -195,7 +199,7 @@ export default function VehicleInfoPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {data.rawValue.coverageHistory.map((history : any, historyIndex : number) => (
+                            {data.rawValue.coverageHistory.map((history: any, historyIndex: number) => (
                               <tr key={historyIndex}>
                                 <td className="border py-1 px-2">{history.startDate}</td>
                                 <td className="border py-1 px-2">{history.endDate}</td>
