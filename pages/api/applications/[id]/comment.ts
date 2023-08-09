@@ -6,22 +6,22 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { id, token } = req.query;
+    const { id } = req.query;
     const { comment } = req.body;
+    const authorization = req.headers.authorization;
     try {
       await axios({
         method: "POST",
         url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/application/${id}/comments`,
         headers: {
           "x-source": "dashboard",
-          ...(token && { "x-firebase-auth": token }),
+          ...(authorization && { Authorization: authorization }),
         },
         data: {
-            comment,
+          comment,
         },
       });
-        res.status(200).json({ message: "Comment added successfully" });
-        
+      res.status(200).json({ message: "Comment added successfully" });
     } catch (error: any) {
       console.error(error);
       res

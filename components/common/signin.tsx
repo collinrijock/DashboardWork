@@ -1,8 +1,8 @@
+import { useAuthContext } from "@/hooks/auth";
 import React, { FC } from "react";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 const SignIn: FC = () => {
-  const { signIn } = useFirebaseAuth();
+  const { login } = useAuthContext();
 
   return (
     <div className="h-screen grid place-content-center">
@@ -12,7 +12,7 @@ const SignIn: FC = () => {
         </div>
         <div className="text-center mt-6">
           <button
-            onClick={signIn}
+            onClick={login}
             className="w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-lula"
           >
             Sign in with Google

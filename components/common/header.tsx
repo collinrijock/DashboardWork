@@ -1,15 +1,15 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
-import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useRouter } from 'next/router';
 import useDarkMode from '@/hooks/useDarkMode';
+import { useAuthContext } from "@/hooks/auth";
 
 const Header: FC = () => {
   const router = useRouter();
   const currentRoute = router.pathname;
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const { user, signOut } = useFirebaseAuth();
+  const { user, logout } = useAuthContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { setDarkMode, darkMode } = useDarkMode();
   const excludedButtonRef = useRef<HTMLElement>(null);
@@ -19,8 +19,8 @@ const Header: FC = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    await logout();
     setDropdownVisible(false);
   };
 

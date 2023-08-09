@@ -6,7 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
-    const { id, token } = req.query;
+    const { id } = req.query;
+    const authorization = req.headers.authorization;
     let comments = [];
     try {
       const response = await axios({
@@ -14,7 +15,7 @@ export default async function handler(
         url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/application/${id}/comments`,
         headers: {
           "x-source": "dashboard",
-          ...(token && { "x-firebase-auth": token }),
+          ...(authorization && { Authorization: authorization }),
         },
         validateStatus: function (status) {
           return status < 500;
