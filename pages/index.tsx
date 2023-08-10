@@ -1,27 +1,21 @@
-import React from 'react';
-import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
-import TotalVehiclesCard from '../components/cards/totalVehiclesCard';
+// pages/applications/index.tsx
+import Table from '@/components/table';
 import Head from 'next/head';
 
-export default function Home() {
-  const { user } = useFirebaseAuth();
-  const firstName = user?.displayName?.split(" ")[0] || "";
-
+const Applications = () => {
   return (
-    <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">
+    <div className="flex flex-col p-12 animate-fade-in min-h-screen bg-secondary">
       <Head>
-        <title>Paddocks</title>
+        <title>Applications</title>
       </Head>
-      <h1 className="w-full text-6xl p-2">Welcome {firstName}</h1>
-      <div >
-        <h2 className='font-serif text-2xl mt-12 p-2'>
-          What&#39;s happening
-        </h2>
-        <div className='flex flex-row mt-4'>
-          <TotalVehiclesCard />
-        </div>
-        
-      </div>
+      <h1 className="w-full text-6xl p-2">Applications</h1>
+      <p className="p-2">
+        Click on the <span className="underline">arrow at the end of a table row</span> to view more
+        details on an application.
+      </p>
+      <Table />
     </div>
   );
-}
+};
+
+export default Applications;

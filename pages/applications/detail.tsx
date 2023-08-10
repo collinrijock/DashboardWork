@@ -50,77 +50,99 @@ const ApplicationDetail = () => {
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const { token } = useFirebaseAuth();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [documentType, setDocumentType] = useState<string>("");
+  const [documentName, setDocumentName] = useState<string | null>(null);
+  const [documentDescription, setDocumentDescription] = useState<string | null>(null);
+
+
+  const fetchApplication = async () => {
+    try {
+      const response = await fetch(`/api/applications/${id}?token=${token}`);
+      const data = await response.json();
+      setApplication(data);
+    } catch (error: any) {
+      console.error("Error fetching application:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchApplication = async () => {
-      try {
-        const response = await fetch(
-          `/api/application-details?id=${id}&token=${token}`
-        );
-        const data = await response.json();
-        setApplication(data);
-      } catch (error: any) {
-        console.error("Error fetching application:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     if (token) {
       fetchApplication();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
 
-  if (!id || !application) {
-    return (
-      <div>
-        <Head>
-          <title>Not Found</title>
-        </Head>
-        <div className="bg-secondary">
-          <button
-            onClick={() => router.back()}
-            className="bg-primary hover:bg-primary-hover p-2 m-4 rounded"
-          >
-            Back
-          </button>
-          <div className="container mx-auto p-4">
-            <h1 className="w-full text-6xl p-2">Applicant Details</h1>
-            <p>Missing data</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  async function updateApplicationStatus(applicationId: string,) {
-    if (!['approved', 'rejected'].includes(status)) {
-      throw new Error('Invalid status. Status should be "approved" or "rejected".');
+  const handleFileChange = async (e: any) => {
+    if (e.target.files.length) {
+      setSelectedFile(e.target.files[0]);
     }
+  };
 
-    try {
-      const response = await axios({
-        method: 'post',
-        url: `${process.env.NEXT_PUBLIC_LULA_API_URL}/embedded/v1/backoffice/statusupdate`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          id: applicationId,
-          status: status,
-        },
-      });
+  const clearDocumentUploadFields = () => {
+    setSelectedFile(null);
+    setDocumentType("");
+    setDocumentName(null);
+    setDocumentDescription(null);
+  };
 
-      if (response.status === 200) {
-        // Handle success (update UI, show notification, etc.)
-      } else {
-        throw new Error(`Failed to update application status to ${status}`);
+  const handleUpload = async () => {
+    if (selectedFile && documentDescription && documentName && documentType.length > 0) {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("documentType", documentType);
+      formData.append("documentName", documentName);
+      formData.append("documentDescription", documentDescription);
+      formData.append("applicationId", id as string);
+
+      try {
+        await axios.post(`/api/applications/${id}/documents/upload`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "x-firebase-auth": token || ""
+          },
+        });
+        fetchApplication();
+        clearDocumentUploadFields();
+      } catch (err: any) {
+        console.error(err.message);
       }
-    } catch (error) {
-      console.error(error);
+    } else {
+      alert("Please fill out all fields");
     }
-  }
+  };
+  // async function updateApplicationStatus(applicationId: string,) {
+  //   if (!['approved', 'rejected'].includes(status)) {
+  //     throw new Error('Invalid status. Status should be "approved" or "rejected".');
+  //   }
+
+  //   try {
+  //     const response = await axios({
+  //       method: 'post',
+  //       url: `${process.env.NEXT_PUBLIC_LULA_API_URL}/embedded/v1/backoffice/statusupdate`,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       data: {
+  //         id: applicationId,
+  //         status: status,
+  //       },
+  //     });
+
+  //     if (response.status === 200) {
+  //       // Handle success (update UI, show notification, etc.)
+  //     } else {
+  //       throw new Error(`Failed to update application status to ${status}`);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
 
   return (
-    <div className="bg-secondary">
+    <div className="bg-secondary min-h-screen">
       <Head>
         <title>Applicant Details</title>
       </Head>
@@ -130,10 +152,10 @@ const ApplicationDetail = () => {
       >
         Back
       </button>
-      <div className="container mx-auto p-4">
+      <div className="px-12 pt-12">
         <h1 className="w-full text-6xl p-2">Applicant Details</h1>
-        {application ? (
-          <div className="flex flex-col">
+        <div className={`transition-opacity duration-300 ease-in-out ${application ? 'opacity-100' : 'opacity-0'}`}>
+          {application && id && <div className="flex flex-col">
             <div className="flex md:flex-row mt-4" >
               {/* Business Information */}
               <div className="w-2/3 bg-primary p-4 rounded">
@@ -142,15 +164,15 @@ const ApplicationDetail = () => {
                 <div className="flex flex-row justify-between flex-wrap">
                   <div>
                     <label className="text-xs">First Name</label>
-                    <p>{application.applicationData.applicant?.firstName || "Missing"}</p>
+                    <p>{application.applicationData?.applicant?.firstName || "Missing"}</p>
                   </div>
                   <div>
                     <label className="text-xs">Last Name</label>
-                    <p>{application.applicationData.applicant?.lastName || "Missing"}</p>
+                    <p>{application.applicationData?.applicant?.lastName || "Missing"}</p>
                   </div>
                   <div>
                     <label className="text-xs">Phone</label>
-                    <p>{application.applicationData.applicant?.phone || "Missing"}</p>
+                    <p>{application.applicationData?.applicant?.phone || "Missing"}</p>
                   </div>
                   <div>
                     <label className="text-xs">Business Name</label>
@@ -160,7 +182,7 @@ const ApplicationDetail = () => {
                 <div className="flex flex-row mt-4">
                   <div>
                     <label className="text-xs">Email</label>
-                    <p>{application.applicationData.applicant?.email || "Missing"}</p>
+                    <p>{application.applicationData?.applicant?.email || "Missing"}</p>
                   </div>
                   <div className="ml-10">
                     <label className="text-xs">EIN</label>
@@ -209,11 +231,11 @@ const ApplicationDetail = () => {
 
             {/* Documents */}
             <div className="bg-primary py-4 mt-4 rounded">
-              <h3 className="text-xl font-serif mb-4 ml-4">Documents</h3>
+              <h3 className="text-md mb-4 ml-4">Documents</h3>
               {application.applicationDocuments && application.applicationDocuments.length > 0 ? (
-                <ul className="flex flex-col justify-around">
+                <div className="flex flex-col justify-around">
                   {application.applicationDocuments.map((document: any, index) => (
-                    <div key={index} className=" flex flex-row items-center justify-end p-4 border-t border-primary-dimmed">
+                    <div key={index} className="flex flex-row items-center justify-end p-4 border-t border-primary-dimmed ">
                       <div className="flex flex-col mr-auto">
                         <div className="flex flex-row items-center">
                           <a
@@ -245,26 +267,73 @@ const ApplicationDetail = () => {
                       </div>
                     </div>
                   ))}
-                </ul>
+                </div>
               ) : (
                 <div className="ml-4" >No documents found.</div>
               )}
+
+            </div>
+
+            <div className="flex flex-col w-full">
+              <h3 className="text-md p-4">Upload a Document</h3>
+              <div className="flex flex-row w-full">
+                <div className="flex flex-row items-center">
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    className="border border-primary rounded ml-4"
+                  />
+                </div>
+                <div className={`transition-opacity w-full duration-300 ease-in-out ${selectedFile ? 'opacity-100' : 'opacity-0'}`}>
+                  {selectedFile && <div className="flex flex-row w-full justify-around">
+                    <select
+                      className="w-full ml-4 box-border border-none bg-primary placeholder:text-primary-dimmed"
+                      value={documentType}
+                      onChange={(e) => setDocumentType(e.target.value)}
+                    >
+                      <option value="">Document Type</option>
+                      <option value="rental_agreement">Rental Agreement</option>
+                      <option value="loss_runs">Loss Runs</option>
+                      <option value="coverage_agreement">Coverage Agreement</option>
+                      
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Document Name"
+                      value={documentName as string}
+                      onChange={(e) => setDocumentName(e.target.value)}
+                      className="w-full ml-4 box-border border-none bg-primary placeholder:text-primary-dimmed"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Document Description"
+                      value={documentDescription as string}
+                      onChange={(e) => setDocumentDescription(e.target.value)}
+                      className="w-full ml-4 box-border border-none bg-primary placeholder:text-primary-dimmed"
+                    />
+                    <button
+                      className="bg-primary text-primary rounded p-2 ml-4"
+                      onClick={handleUpload}
+                    >
+                      Upload
+                    </button>
+                  </div>}
+                </div>
+              </div>
             </div>
 
             {/* Vehicles */}
-            <div className="w-full bg-primary py-4 mt-4 rounded relative">
+            <div className="w-full bg-primary py-4 my-4 rounded relative">
               <input
-                className="absolute right-4 top-4 border border-gray-300 rounded p-1"
+                className="absolute right-4 top-4 border border-primary rounded p-1"
                 type="search"
                 placeholder="Search Vehicles..."
               />
               <h3 className="mb-4 ml-4">Vehicles</h3>
               {/* Vehicles Here */}
             </div>
-          </div>
-        ) : (
-          <div>Missing data</div>
-        )}
+          </div>}
+        </div>
       </div>
     </div>
   );
