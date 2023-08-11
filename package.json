@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.16",
-    "@lula-technologies-inc/document-service": "0.1.4",
     "@lula-technologies-inc/lux": "^0.2.20",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/line-clamp": "^0.4.2",

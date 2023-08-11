@@ -628,11 +628,6 @@
   dependencies:
     lodash "^4.17.21"
 
-"@lula-technologies-inc/document-service@0.1.4":
-  version "0.1.4"
-  resolved "https://npm.pkg.github.com/download/@lula-technologies-inc/document-service/0.1.4/b731101a11281e3f8dd943af559e17e318faa758#b731101a11281e3f8dd943af559e17e318faa758"
-  integrity sha512-W6sz2/WJlEb6jch4YVoplOcmNmZjm1LUN9gmUm1LdKq3z9p8XKRcfwvn5lSHfMKbea3qYBA28W9fwp0tK+E2jQ==
-
 "@lula-technologies-inc/lux@^0.2.20":
   version "0.2.42"
   resolved "https://npm.pkg.github.com/download/@Lula-Technologies-Inc/lux/0.2.42/277f1817d214723926a3f2c754a0286dfad90e11#277f1817d214723926a3f2c754a0286dfad90e11"
