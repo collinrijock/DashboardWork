@@ -12,7 +12,7 @@ export default function VehicleInfoPage() {
   useEffect(() => {
     const fetchUnderwritingChecks = async (vin: string, token: string) => {
       try {
-        const res = await fetch(`/api/underwriting-details?vin=${vin}&token=${token}`);
+        const res = await fetch(`/api/underwriting/details?vin=${vin}&token=${token}`);
         const data = await res.json();
         setUnderwritingChecks(data);
       } catch (error) {
