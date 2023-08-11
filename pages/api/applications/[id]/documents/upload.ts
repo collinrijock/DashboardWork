@@ -33,6 +33,7 @@ export default async function handler(
     const bucketName = process.env.GCS_DOCUMENTS_BUCKETNAME!;
     const bucket = storage.bucket(bucketName);
 
+    // @ts-ignore
     const file = req.file;
     const documentType = req.body.documentType as string;
     const documentName = req.body.documentName as string;
