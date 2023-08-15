@@ -61,47 +61,41 @@ export default async function handler(
       return;
     }
 
-    const fileName = `${applicationId}/${documentName}`;
-    const fileStream = bucket.file(fileName).createWriteStream({
-      contentType: file.mimetype,
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
+    const fileName = `${formattedDate}-${documentName}`;
+
+    bucket.file(`${applicationId}/${fileName}`).save(file.buffer,{
+      contentType: file.mimetype,resumable: false
     });
 
-    fileStream.write(file.buffer, (err) => {
-      if (err) {
+
+    const fileLocation = `/${bucketName}/${applicationId}/${fileName}`;
+    const backendBody = {
+      applicationId,
+      documentType,
+      documentName,
+      documentDescription: req.body.documentDescription,
+      filePath: fileLocation,
+    };
+
+    const url = `${process.env.LULA_API_URL}/embedded/v1/application/documents`;
+    const headers = {
+      "x-firebase-auth": req.headers["x-firebase-auth"],
+      "content-type": "application/json",
+      "x-source": "test",
+    };
+
+    axios
+      .post(url, backendBody, { headers })
+      .then((response) => {
+        res.status(200).json({ success: true, data: response.data });
+      })
+      .catch((error) => {
         res.status(500).json({
-          error: "An error occurred uploading the file to the storage.",
+          message: "An error occurred while processing the request to the backend.",
+          error: error,
         });
-        return;
-      }
-
-      const fileLocation = `/${bucketName}/${applicationId}/${documentName}`;
-      const backendBody = {
-        applicationId,
-        documentType,
-        documentName,
-        documentDescription: req.body.documentDescription,
-        filePath: fileLocation,
-      };
-
-      const url = `${process.env.LULA_API_URL}/embedded/v1/application/documents`;
-      const headers = {
-        "x-firebase-auth": req.headers["x-firebase-auth"],
-        "content-type": "application/json",
-        "x-source": "test",
-      };
-      console.log(backendBody)
-
-      axios
-        .post(url, backendBody, { headers })
-        .then((response) => {
-          res.status(200).json({ success: true, data: response.data });
-        })
-        .catch((error) => {
-          res.status(500).json({
-            message: "An error occurred while processing the request to the backend.",
-            error: error,
-          });
-        });
-    });
+      });
   });
 }
