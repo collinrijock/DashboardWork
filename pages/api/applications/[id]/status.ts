@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }  
 
     try {
-      const response = await axios({
+      await axios({
         method: 'post',
         url: `${process.env.NEXT_PUBLIC_LULA_API_URL}/embedded/v1/backoffice/statusupdate`,
         headers: {
@@ -20,13 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
         data: data
       });
-
-      if (response.status == 204) {
-        res.status(200).json({ message: 'Successfully updated status' });
-      } else {
-        console.error('Error updating application status:', response);
-        res.status(500).json({ error: `Failed to update application status to ${status}` });
-      }
+      res.status(200).json({ message: 'Successfully updated status' });
     } catch (error : any) {
       console.error(error);
       res.status(500).json({ error: 'Failed to make API request', message: error.message });
