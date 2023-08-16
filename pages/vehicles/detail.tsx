@@ -3,9 +3,11 @@ import { useRouter } from 'next/router';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 export default function VehicleInfoPage() {
+  const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [underwritingChecks, setUnderwritingChecks] = useState(Array<any>());
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const currentCheck = underwritingChecks[currentIndex];
   const { token } = useFirebaseAuth();
   const { vin } = router.query;
 
@@ -17,6 +19,9 @@ export default function VehicleInfoPage() {
         setUnderwritingChecks(data);
       } catch (error) {
         console.error('Error fetching underwriting details:', error);
+      } finally {
+        setLoading(false);
+
       }
     };
 
@@ -45,7 +50,16 @@ export default function VehicleInfoPage() {
     }
   };
 
-  const currentCheck = underwritingChecks[currentIndex];
+
+  if(loading) return (
+    <div className="flex flex-col min-h-screen w-full p-12">
+      <div className=""></div>
+        <h1 className="text-6xl p-2">Vehicle Details <span className='font-sans font-normal underline' >{vin}</span></h1>
+        <div className='flex flex-col items-start mt-4 relative'>
+          <h2>Loading...</h2>
+        </div>
+      </div>
+  )
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -233,7 +247,11 @@ export default function VehicleInfoPage() {
 
           </div>
           :
-          <div>Missing data</div>
+          <div className='flex flex-col items-start mt-4 relative'>
+            <h2>This vin has no history in our underwriting records.</h2>
+            <h3 className='mt-4'>If you want to contribute a record, you can run this vin through AshleyBot, by clicking <a href='https://paddocks.lula.is/underwriting' target='_blank' className='cursor-pointer underline'>here.</a></h3>
+            <h3 className='mt-4'>After running a vin through AshleyBot, refresh this page.</h3>
+          </div>
         }
       </div>
     </div>
