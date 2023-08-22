@@ -209,10 +209,10 @@ const ApplicationDetail = () => {
                   className="p-2 border w-2/3 border-gray-300 rounded text-primary bg-primary"
                 >
                   <option value="NEW">New</option>
-                  <option value="UNDERREVIEW">UnderReview</option>
+                  <option value="UNDERREVIEW">Under Review</option>
+                  <option value="INCOMPLETE">Incomplete</option>
                   <option value="APPROVED">Approved</option>
                   <option value="REJECTED">Rejected</option>
-                  <option value="PENDING">Pending</option>
                   <option value="CANCELLED">Cancelled</option>
                 </select>}
                 {terminalStatuses.includes(application.status as string) &&
