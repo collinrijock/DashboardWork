@@ -15,7 +15,7 @@ export default async function handler(
     const url = `${process.env.NEXT_PUBLIC_LULA_API_URL}/embedded/v1/backoffice/statusupdate`;
 
     try {
-      const response = await axios({
+      await axios({
         method: "post",
         url,
         headers: {
