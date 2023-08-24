@@ -1,6 +1,29 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
+import { IncomingHttpHeaders } from "http";
 
+
+const sendEmail = async (id: string, status: string, headers: IncomingHttpHeaders ) => {
+  const url = `${process.env.LULA_ONBOARDING_API_URL}/account/${id}/application`;
+  if(status.toLowerCase() === 'approved' || status.toLowerCase() === "rejected") {
+    const data = { applicationApproved: status.toLowerCase() === 'approved' ? true : false };
+    try {
+      await axios({
+        method: "post",
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "x-firebase-auth": headers["x-firebase-auth"] as string,
+        },
+        data,
+      });
+      return true;
+    } catch (error: any) {
+      console.error(error);
+      return false;
+    }
+  }
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -12,7 +35,7 @@ export default async function handler(
       status,
       ...(statusNote?.length > 0 && { statusNote }),
     };
-    const url = `${process.env.NEXT_PUBLIC_LULA_API_URL}/embedded/v1/backoffice/statusupdate`;
+    const url = `${process.env.LULA_API_URL}/embedded/v1/backoffice/statusupdate`;
 
     try {
       await axios({
@@ -25,6 +48,7 @@ export default async function handler(
         },
         data,
       });
+      await sendEmail(id, status, req.headers);
       res.status(200).json({ message: "Successfully updated status" });
     } catch (error: any) {
       console.error(error);
