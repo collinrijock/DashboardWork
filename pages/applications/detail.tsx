@@ -3,46 +3,8 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import axios from "axios";
-
-interface Address {
-  addressLine1: any;
-  addressLine2: any;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-}
-
-interface Applicant {
-  email: string;
-  phone: string;
-  lastName: string;
-  firstName: string;
-}
-
-interface Application {
-  applicationDocuments: Array<{
-    name: string;
-    url: string;
-  }>;
-  id: string;
-  externalApplicationId: string;
-  applicationData: {
-    ein: string | null;
-    applicant: Applicant | null;
-    fleetSize: number | null;
-    businessName: string | null;
-    businessAddress: Address | null;
-  };
-  insuranceProgramName: string | null;
-  insuranceProgramSchemaVersion: number | null;
-  createdBy: string | null;
-  createdOn: string | null;
-  updatedOn: string | null;
-  status: string | null;
-  tenantId: string | null;
-  source: string | null;
-}
+import { Application } from "@/types/application";
+import { Icon } from "@lula-technologies-inc/lux";
 
 const ApplicationDetail = () => {
   const router = useRouter();
@@ -50,170 +12,252 @@ const ApplicationDetail = () => {
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const { token } = useFirebaseAuth();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [documentType, setDocumentType] = useState<string>("");
+  const [documentName, setDocumentName] = useState<string | null>(null);
+  const [documentDescription, setDocumentDescription] = useState<string | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<string>("");
+  const [statusNote, setStatusNote] = useState<String>("");
+  const terminalStatuses = ["APPROVED", "REJECTED", "CANCELLED"];
+  const [isDocumentsToggled, setIsDocumentsToggled] = useState<boolean>(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [comment, setComment] = useState<string>("");
 
-  useEffect(() => {
-    const fetchApplication = async () => {
-      try {
-        const response = await fetch(
-          `/api/application-details?id=${id}&token=${token}`
-        );
-        const data = await response.json();
-        setApplication(data);
-      } catch (error: any) {
-        console.error("Error fetching application:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (token) {
-      fetchApplication();
-    }
-  }, [token, id]);
-
-  if (!id || !application) {
-    return (
-      <div>
-        <Head>
-          <title>Not Found</title>
-        </Head>
-        <div className="bg-secondary">
-          <button
-            onClick={() => router.back()}
-            className="bg-primary hover:bg-primary-hover p-2 m-4 rounded"
-          >
-            Back
-          </button>
-          <div className="container mx-auto p-4">
-            <h1 className="w-full text-6xl p-2">Applicant Details</h1>
-            <p>Missing data</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  async function updateApplicationStatus(applicationId: string,) {
-    if (!['approved', 'rejected'].includes(status)) {
-      throw new Error('Invalid status. Status should be "approved" or "rejected".');
-    }
-
+  const fetchApplication = async () => {
     try {
-      const response = await axios({
-        method: 'post',
-        url: `${process.env.NEXT_PUBLIC_LULA_API_URL}/embedded/v1/backoffice/statusupdate`,
+      const response = await fetch(`/api/applications/${id}?token=${token}`);
+      const data = await response.json();
+      setApplication(data);
+      setApplicationStatus(data.status);
+      const commentData = await fetch(`/api/applications/${id}/comments?token=${token}`, { headers: { "x-firebase-auth": token || "" } });
+      const commentJson = await commentData.json();
+      setComments(commentJson);
+
+    } catch (error: any) {
+      console.error("Error fetching application:", error.message);
+    }
+    setLoading(false);
+  };
+
+  async function updateApplicationStatus(newStatus: string) {
+    try {
+      const data = {
+        id,
+        status: newStatus,
+        statusNote: statusNote
+      };
+      const response = await axios.post(`/api/applications/${id}/status`, data, {
         headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          id: applicationId,
-          status: status,
+          "x-firebase-auth": token || ""
         },
       });
 
       if (response.status === 200) {
-        // Handle success (update UI, show notification, etc.)
+        fetchApplication();
       } else {
-        throw new Error(`Failed to update application status to ${status}`);
+        throw new Error(`Failed to update application status to ${newStatus}`);
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  return (
-    <div className="bg-secondary">
-      <Head>
-        <title>Applicant Details</title>
-      </Head>
-      <button
-        onClick={() => router.back()}
-        className="bg-primary hover:bg-primary-hover p-2 m-4 rounded"
-      >
-        Back
-      </button>
-      <div className="container mx-auto p-4">
-        <h1 className="w-full text-6xl p-2">Applicant Details</h1>
-        {application ? (
-          <div className="flex flex-col">
-            <div className="flex md:flex-row mt-4" >
-              {/* Business Information */}
-              <div className="w-2/3 bg-primary p-4 rounded">
-                <h3 className="mb-4">Business Information</h3>
-                {/* Business Fields Here */}
-                <div className="flex flex-row justify-between flex-wrap">
-                  <div>
-                    <label className="text-xs">First Name</label>
-                    <p>{application.applicationData.applicant?.firstName || "Missing"}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs">Last Name</label>
-                    <p>{application.applicationData.applicant?.lastName || "Missing"}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs">Phone</label>
-                    <p>{application.applicationData.applicant?.phone || "Missing"}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs">Business Name</label>
-                    <p>{application.applicationData.businessName || "Missing"}</p>
-                  </div>
-                </div>
-                <div className="flex flex-row mt-4">
-                  <div>
-                    <label className="text-xs">Email</label>
-                    <p>{application.applicationData.applicant?.email || "Missing"}</p>
-                  </div>
-                  <div className="ml-10">
-                    <label className="text-xs">EIN</label>
-                    <p>{application.applicationData.ein || "Missing"}</p>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label className="text-xs">Business Address</label>
-                  <p>
-                    {application.applicationData.businessAddress ?
-                      `${application.applicationData?.businessAddress?.addressLine1}${application.applicationData.businessAddress?.addressLine2 ? ', ' + application.applicationData.businessAddress.addressLine2 : ''}, ${application.applicationData.businessAddress.city}, ${application.applicationData.businessAddress.state}, ${application.applicationData.businessAddress.zip}`
-                      : "Missing"
-                    }
-                  </p>
+  // Update application status when applicationStatus changes
+  const handleStatusChange = async (newStatus: string) => {
+    setApplicationStatus(newStatus)
+    if (!terminalStatuses.includes(newStatus)) {
+      updateApplicationStatus(newStatus);
+    }
+  }
 
+  useEffect(() => {
+    if (token && id) {
+      fetchApplication();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, id]);
+
+  const handleFileChange = async (e: any) => {
+    if (e.target.files.length) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const clearDocumentUploadFields = () => {
+    setSelectedFile(null);
+    setDocumentType("");
+    setDocumentName(null);
+    setDocumentDescription(null);
+  };
+
+  const handleUpload = async () => {
+    if (selectedFile && documentDescription && documentName && documentType.length > 0) {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("documentType", documentType);
+      formData.append("documentName", documentName);
+      formData.append("documentDescription", documentDescription);
+      formData.append("applicationId", id as string);
+
+      try {
+        await axios.post(`/api/applications/${id}/documents/upload`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "x-firebase-auth": token || ""
+          },
+        });
+        fetchApplication();
+        clearDocumentUploadFields();
+      } catch (err: any) {
+        console.error(err.message);
+        alert("Error uploading document, please use a supported file type.");
+      }
+    } else {
+      alert("Please fill out all fields");
+    }
+  };
+
+  const toggleDocumentsSection = () => {
+    setIsDocumentsToggled(!isDocumentsToggled);
+  }
+
+  const uploadComment = () => {
+    if (comment.length > 0) {
+      const data = {
+        comment
+      };
+      axios.post(`/api/applications/${id}/comment?token=${token}`, data
+      ).then(() => {
+        fetchApplication();
+        setComment("");
+      }).catch((err) => {
+        console.error(err);
+      });
+    }
+  }
+
+
+  const renderApplicationDetails = () => {
+    if (loading || !id || !application?.applicationData) {
+      return <div></div>;
+    } else {
+      return (
+        <div className="flex flex-col">
+          <div className="flex md:flex-row mt-4" >
+            {/* Business Information */}
+            <div className="w-2/3 bg-primary p-4 rounded">
+              <h3 className="mb-4">Business Information</h3>
+              {/* Business Fields Here */}
+              <div className="flex flex-row justify-between flex-wrap">
+                <div>
+                  <label className="text-xs">First Name</label>
+                  <p>{application.applicationData?.applicant?.firstName || "Missing"}</p>
                 </div>
-                <div className="mt-4 flex flex-row">
-                  <div>
-                    <label className="text-xs">Insurance Program</label>
-                    <p>{application.insuranceProgramName ? `${application.insuranceProgramName.replace(/_/g, ' ')} v${application.insuranceProgramSchemaVersion}` : "Missing"}</p>
-                  </div>
-                  <div className="ml-4">
-                    <label className="text-xs">Fleet Size</label>
-                    <p>{application.applicationData.fleetSize || "Missing"}</p>
-                  </div>
+                <div>
+                  <label className="text-xs">Last Name</label>
+                  <p>{application.applicationData?.applicant?.lastName || "Missing"}</p>
+                </div>
+                <div>
+                  <label className="text-xs">Phone</label>
+                  <p>{application.applicationData?.applicant?.phone || "Missing"}</p>
+                </div>
+                <div>
+                  <label className="text-xs">Business Name</label>
+                  <p>{application.applicationData.businessName || "Missing"}</p>
                 </div>
               </div>
+              <div className="flex flex-row mt-4">
+                <div>
+                  <label className="text-xs">Email</label>
+                  <p>{application.applicationData?.applicant?.email || "Missing"}</p>
+                </div>
+                <div className="ml-10">
+                  <label className="text-xs">EIN</label>
+                  <p>{application.applicationData.ein || "Missing"}</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="text-xs">Business Address</label>
+                <p>
+                  {application.applicationData.businessAddress ?
+                    `${application.applicationData?.businessAddress?.addressLine1}${application.applicationData.businessAddress?.addressLine2 ? ', ' + application.applicationData.businessAddress.addressLine2 : ''}, ${application.applicationData.businessAddress.city}, ${application.applicationData.businessAddress.state}, ${application.applicationData.businessAddress.zip}`
+                    : "Missing"
+                  }
+                </p>
 
-              {/* Application Statuses */}
-              <div className="w-1/3 bg-primary p-4 rounded ml-2">
-                <h3 className="mb-4">Application Statuses</h3>
-                <div className="flex flex-row items-center justify-between mb-4">
-                  <label className="text-sm mb-2">Status</label>
-                  {/* <select
-                    value={String(application.status)}
-                    onChange={(e : any) => updateApplicationStatus(application.id, e.target.value)}
-                    className="p-2 border w-2/3 border-gray-300 rounded"
-                  >
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select> */}
-                  <p>{application.status}</p>
+              </div>
+              <div className="mt-4 flex flex-row">
+                <div>
+                  <label className="text-xs">Insurance Program</label>
+                  <p>{application.insuranceProgramName ? `${application.insuranceProgramName.replace(/_/g, ' ')} v${application.insuranceProgramSchemaVersion}` : "Missing"}</p>
+                </div>
+                <div className="ml-4">
+                  <label className="text-xs">Fleet Size</label>
+                  <p>{application.applicationData.fleetSize || "Missing"}</p>
                 </div>
               </div>
             </div>
 
-            {/* Documents */}
-            <div className="bg-primary py-4 mt-4 rounded">
-              <h3 className="text-xl font-serif mb-4 ml-4">Documents</h3>
-              {application.applicationDocuments && application.applicationDocuments.length > 0 ? (
-                <ul className="flex flex-col justify-around">
+            {/* Application Statuses */}
+            <div className="w-1/3 bg-primary p-4 rounded ml-2">
+              <h3 className="mb-4">Application Statuses</h3>
+              <div className="flex flex-row items-center justify-between mb-4">
+                <label className="text-sm mb-2">Status</label>
+                {!terminalStatuses.includes(application.status as string) && <select
+                  value={applicationStatus}
+                  onChange={(e: any) => handleStatusChange(e.target.value)}
+                  className="p-2 border w-2/3 border-gray-300 rounded text-primary bg-primary"
+                >
+                  <option value="NEW">New</option>
+                  <option value="UNDERREVIEW">Under Review</option>
+                  <option value="INCOMPLETE">Incomplete</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>}
+                {terminalStatuses.includes(application.status as string) &&
+                  <p className="text-primary">{application.status}</p>
+                }
+
+              </div>
+              <div className={`transition-opacity w-full duration-300 ease-in-out ${terminalStatuses.includes(applicationStatus) ? 'opacity-100' : 'opacity-0'}`}>
+                {terminalStatuses.includes(applicationStatus) && !terminalStatuses.includes(String(application.status)) &&
+                  <div>
+                    <textarea
+                      value={statusNote as string}
+                      onChange={(e) => setStatusNote(e.target.value)}
+                      placeholder="Status Notes"
+                      className="w-full text-primary bg-primary border border-gray-300 rounded"
+                    />
+                    <button
+                      className="bg-secondary w-full text-primary rounded p-2 mt-4"
+                      onClick={() => { if (statusNote.length > 0) updateApplicationStatus(applicationStatus) }}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          {/* Documents */}
+          <div className="bg-primary mt-4 rounded">
+            <div className="flex flex-row items-center justify-between p-4">
+              <h3 className="text-md">Documents</h3>
+              {application.applicationDocuments.length > 0 &&
+                <button onClick={toggleDocumentsSection} className={`transition-transform duration-300 ${isDocumentsToggled ? 'rotate-90' : 'rotate-0'}`}>
+                  <Icon
+                    icon="circle-chevron-down cursor-pointer"
+                    className="fa-solid"
+                  />
+                </button>}
+            </div>
+            <div className={`transition-opacity w-full duration-300 ease-in-out ${!isDocumentsToggled && application.applicationDocuments.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
+              {!isDocumentsToggled && application.applicationDocuments && application.applicationDocuments.length > 0 && (
+                <div className="flex flex-col justify-around">
                   {application.applicationDocuments.map((document: any, index) => (
-                    <div key={index} className=" flex flex-row items-center justify-end p-4 border-t border-primary-dimmed">
+                    <div key={index} className="flex flex-row items-center justify-end p-4 border-t border-primary-dimmed ">
                       <div className="flex flex-col mr-auto">
                         <div className="flex flex-row items-center">
                           <a
@@ -245,30 +289,132 @@ const ApplicationDetail = () => {
                       </div>
                     </div>
                   ))}
-                </ul>
-              ) : (
-                <div className="ml-4" >No documents found.</div>
+                </div>
               )}
             </div>
+          </div>
 
-            {/* Vehicles */}
-            <div className="w-full bg-primary py-4 mt-4 rounded relative">
-              <input
-                className="absolute right-4 top-4 border border-gray-300 rounded p-1"
-                type="search"
-                placeholder="Search Vehicles..."
-              />
-              <h3 className="mb-4 ml-4">Vehicles</h3>
-              {/* Vehicles Here */}
+          <div className="flex flex-col w-full">
+            <h3 className="text-md p-4">Upload a Document</h3>
+            <div className="flex flex-row w-full">
+              <div className="flex flex-row items-center">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="border border-primary rounded ml-4"
+                />
+              </div>
+              <div className={`transition-opacity w-full duration-300 ease-in-out ${selectedFile ? 'opacity-100' : 'opacity-0'}`}>
+                {selectedFile && <div className="flex flex-row w-full justify-around">
+                  <select
+                    className="w-full ml-4 box-border border-none bg-primary placeholder:text-primary-dimmed"
+                    value={documentType}
+                    onChange={(e) => setDocumentType(e.target.value)}
+                  >
+                    <option value="">Document Type</option>
+                    <option value="rental_agreement">Rental Agreement</option>
+                    <option value="loss_runs">Loss Runs</option>
+                    <option value="coverage_agreement">Coverage Agreement</option>
+
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Document Name"
+                    value={documentName as string}
+                    onChange={(e) => setDocumentName(e.target.value)}
+                    className="w-full ml-4 box-border border-none bg-primary placeholder:text-primary-dimmed"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Document Description"
+                    value={documentDescription as string}
+                    onChange={(e) => setDocumentDescription(e.target.value)}
+                    className="w-full ml-4 box-border border-none bg-primary placeholder:text-primary-dimmed"
+                  />
+                  <button
+                    className="bg-primary text-primary rounded p-2 ml-4"
+                    onClick={handleUpload}
+                  >
+                    Upload
+                  </button>
+                </div>}
+              </div>
             </div>
           </div>
-        ) : (
-          <div>Missing data</div>
-        )}
+
+          {/* Commments */}
+          <div className="bg-primary mt-4 rounded">
+            <div className="flex flex-row items-center justify-between p-4">
+              <h3 className="text-md">Comments</h3>
+            </div>
+            <div className="flex flex-col justify-around">
+              {comments?.length > 0 ? (
+                <div className="flex flex-col justify-around">
+                  {comments.map((comment: any, index) => (
+                    <div key={index} className="flex flex-row items-center justify-end p-4 border-t border-primary-dimmed ">
+                      <div className="flex flex-col mr-auto">
+                        <p className="text-primary">{comment.comment}</p>
+                        <p className="text-primary-dimmed" >{comment.createdBy}</p>
+                      </div>
+                      <p className="text-primary-dimmed">{new Date(comment.createdOn).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-row items-center justify-end p-4 border-t border-primary-dimmed ">
+                  <p className="text-primary">No comments yet</p>
+                </div>)}
+            </div>
+            {/* Comment Box */}
+            <div className="p-4">
+              <textarea
+                className="w-full p-2 border rounded focus:outline-none focus:border-primary bg-primary text-primary"
+                placeholder="Write a comment..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              ></textarea>
+              <button className="mt-2 bg-secondary py-1 px-4 rounded hover:bg-primary-hover"
+                onClick={uploadComment}
+              >
+                Submit Comment
+              </button>
+            </div>
+
+          </div>
+
+          {/* Vehicles */}
+          <div className="w-full bg-primary py-4 my-4 rounded relative">
+            <input
+              className="absolute right-4 top-4 border border-primary rounded p-1"
+              type="search"
+              placeholder="Search Vehicles..."
+            />
+            <h3 className="mb-4 ml-4">Vehicles</h3>
+            {/* Vehicles Here */}
+          </div>
+        </div>);
+    }
+  };
+
+  return (
+    <div className="bg-secondary min-h-screen">
+      <Head>
+        <title>Applicant Details</title>
+      </Head>
+      <button
+        onClick={() => router.back()}
+        className="bg-primary hover:bg-primary-hover p-2 m-4 rounded"
+      >
+        Back
+      </button>
+      <div className="px-12 pt-12">
+        <h1 className="w-full text-6xl p-2">Applicant Details</h1>
+        <div className={`transition-opacity duration-300 ease-in-out ${application ? 'opacity-100' : 'opacity-0'}`}>
+          {renderApplicationDetails()}
+        </div>
       </div>
     </div>
   );
-
 
 };
 

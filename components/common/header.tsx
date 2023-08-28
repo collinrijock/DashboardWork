@@ -28,7 +28,6 @@ const Header: FC = () => {
 
   const navLinks = [
     { label: 'Home', href: '/' },
-    { label: 'Applications', href: '/applications' },
     { label: 'Trucking', href: '/policy/trucking' },
   ];
 

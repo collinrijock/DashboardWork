@@ -20,7 +20,7 @@ const PostPolicy = () => {
         event.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch("/api/submit-policy", {
+            const response = await fetch("/api/policies", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
