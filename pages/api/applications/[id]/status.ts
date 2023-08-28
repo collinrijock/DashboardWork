@@ -13,13 +13,13 @@ const sendEmail = async (id: string, status: string, headers: IncomingHttpHeader
         url,
         headers: {
           "Content-Type": "application/json",
-          "x-firebase-auth": headers["x-firebase-auth"] as string,
+          "Authorization": `bearer ${headers["x-firebase-auth"] as string}`,
         },
         data,
       });
       return true;
     } catch (error: any) {
-      console.error(error);
+      console.error(JSON.stringify(error));
       return false;
     }
   }
