@@ -9,7 +9,7 @@ const Applications = () => {
         <title>Applications</title>
       </Head>
       <h1 className="w-full text-6xl p-2">Applications</h1>
-      <p className="p-2">
+      <p className="p-2 text-primary-dimmed">
         Click on the <span className="underline">arrow at the end of a table row</span> to view more
         details on an application.
       </p>

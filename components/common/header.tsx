@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useRouter } from 'next/router';
+import useDarkMode from '@/hooks/useDarkMode';
 
 const Header: FC = () => {
   const router = useRouter();
@@ -10,6 +11,9 @@ const Header: FC = () => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const { user, signOut } = useFirebaseAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { setDarkMode, darkMode } = useDarkMode();
+  const excludedButtonRef = useRef<HTMLElement>(null);
+
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -21,7 +25,12 @@ const Header: FC = () => {
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    // Check if the click was outside the dropdown AND not on the excluded button
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node) &&
+      (!excludedButtonRef.current || !excludedButtonRef.current.contains(event.target as Node))
+    ) {
       setDropdownVisible(false);
     }
   };
@@ -64,6 +73,8 @@ const Header: FC = () => {
           <button
             className="rounded-full w-10 h-10 border-2 border-primary-dimmed hover:border-primary grid place-content-center cursor-pointer transition-all duration-200 animate-fade-in"
             onClick={toggleDropdown}
+            // @ts-ignore
+            ref={excludedButtonRef}
           >
             <Icon
               icon="user"
@@ -74,11 +85,19 @@ const Header: FC = () => {
           </button>
           {/* Dropdown */}
           {dropdownVisible && (
-            <div ref={dropdownRef} className="absolute overflow-hidden right-0 mt-3 w-48 bg-primary rounded-lg shadow-2xl text-primary text-sm z-10 animate-fade-in-down">
+            <div ref={dropdownRef} className="absolute overflow-hidden right-0 mt-6 w-48 bg-primary rounded-lg shadow-xl text-primary text-sm z-10 animate-fade-in-down">
 
-              <div className="px-4 py-2">
+              <div className="px-4 py-2 text-center text-primary-dimmed">
                 Signed in as:
-                <div className="font-semibold">{user?.email}</div>
+                <div className="font-semibold text-center text-primary">{user?.email}</div>
+              </div>
+              <div>
+                <button
+                  className="w-full px-4 py-2 text-center text-primary-dimmed border-t border-secondary hover:bg-primary-hover"
+                  onClick={() => setDarkMode(!darkMode)}
+                >
+                  Toggle Dark Mode
+                </button>
               </div>
               <button
                 className="w-full px-4 py-2 text-center text-white bg-red-500 hover:bg-red-600"

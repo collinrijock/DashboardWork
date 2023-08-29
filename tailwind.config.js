@@ -71,6 +71,10 @@ module.exports = {
         'secondary': 'var(--color-bg-secondary)',
         'primary-hover': 'var(--color-bg-primary-highlighted)',
       },
+      placeholderColor: {
+        'primary': 'var(--color-text-primary)',
+        'primary-dimmed': 'var(--color-text-primary-dimmed)',
+      },
       fontFamily: {
         abel: ["Abel"],
         lazzer: ["Lazzer"],
