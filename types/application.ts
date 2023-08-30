@@ -22,6 +22,7 @@ export interface Application {
   id: string;
   externalApplicationId: string;
   applicationData: {
+    dot: any;
     ein: string | null;
     applicant: Applicant | null;
     fleetSize: number | null;
