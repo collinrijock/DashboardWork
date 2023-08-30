@@ -24,10 +24,9 @@ export default async function handler(
       if (response.status === 200) {
         assets = response.data;
       }
-      console.log(url);
       res.status(200).json(assets);
     } catch (error: any) {
-      console.error(error);
+      console.error(JSON.stringify(error));
       res
         .status(500)
         .json({ error: "Failed to make API request", message: error.message });

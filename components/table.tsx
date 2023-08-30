@@ -174,9 +174,7 @@ const Table: React.FC = () => {
             onChange={(e) => setFilterInsuranceProgram(e.target.value)}
           >
             <option value="">Filter by Insurance Program</option>
-            <option value="ContinuousCoverage">Continuous Coverage</option>
-            <option value="ORP">ORP</option>
-            <option value="SLI">SLI</option>
+            <option value="continuous_coverage">Continuous Coverage</option>
           </select>
           <select
             className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed"
