@@ -19,6 +19,7 @@ const Table: React.FC = () => {
   const [updatedRowIds, setUpdatedRowIds] = useState<Set<string>>(new Set());
   const { token } = useFirebaseAuth();
   const [firstLoad, setFirstLoad] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Functions
   const loadMoreRows = () => {
@@ -127,75 +128,81 @@ const Table: React.FC = () => {
 
   return (
     <div className="font-sans py-4">
-      <div className="grid grid-cols-4 gap-4 mb-4">
-        <div className="relative w-full col-span-2 border-none px-2 bg-primary rounded-sm flex flex-row items-center justify-center">
+      <div className="flex flex-row mb-4 items-center">
+        <div className="relative w-full border-none px-2 bg-primary rounded-md flex flex-row items-center justify-center shadow-md">
           <Icon
             icon="magnifying-glass"
-            className="ml-1 fa-solid text-gray-500"
+            className="ml-1 fa-solid text-primary-dimmed"
           />
           <input
             type="text"
-            placeholder="Search"
-            className="w-full box-border pl-6 pr-4 border-none bg-primary"
+            placeholder="Search business name,  first  /  last name,  email  or  phone number"
+            className="w-full box-border pl-6 pr-4 border-none bg-primary text-sm py-3 placeholder-primary-dimmed tracking-wider"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
         </div>
-        <input
-          type="date"
-          placeholder="dd/mm/yyyy"
-          className="w-full border-none px-2 rounded bg-primary text-sm col-span-2"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-        />
-        <select
-          className="w-full border-none p-2 rounded bg-primary text-xs"
-          value={filterInsuranceProgram}
-          onChange={(e) => setFilterInsuranceProgram(e.target.value)}
+        {/* Filter toggle */}
+        <button
+          className="ml-4 w-11 h-11 p-0 bg-primary rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md flex items-center justify-center"
+          onClick={() => setShowFilters(!showFilters)}
+          title={"Show / hide filters"}
         >
-          <option value="">Filter by Insurance Program</option>
-          <option value="ContinuousCoverage">Continuous Coverage</option>
-          <option value="ORP">ORP</option>
-          <option value="SLI">SLI</option>
-        </select>
-        <select
-          className="w-full border-none p-2 rounded bg-primary text-xs"
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
-          <option value="">Filter by Application Status</option>
-          <option value="New">New</option>
-          <option value="Incomplete">Incomplete</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-        <select
-          className="w-full border-none p-2 rounded bg-primary text-xs"
-          value={filterSource}
-          onChange={(e) => setFilterSource(e.target.value)}
-        >
-          <option value="">Filter by Source</option>
-          <option value="OnBoarding">On Boarding</option>
-          <option value="CAVF">CAVF</option>
-        </select>
-        <select
-          className="w-full border-none p-2 rounded bg-primary text-xs"
-          value={filterSource}
-          onChange={(e) => setFilterDocument(e.target.value == "coi")}
-        >
-          <option value="">Filter by Documents</option>
-          <option value={"coi"}>COI</option>
-        </select>
-        {/* <button
-          className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
-          onClick={clearFilters}
-        >
-          Clear Filters
-        </button> */}
+          <Icon
+            icon="filter"
+            className="fa-solid text-primary-dimmed p-0"
+          />
+        </button>
+      </div>
+
+      {/* Filter Tray */}
+      <div className={`transition-all duration-300 ease-in-out ${showFilters ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+        <div className={`flex flex-row gap-x-10 mb-4 ${showFilters ? 'block' : 'hidden'}`}>
+
+          <input
+            type="text"
+            placeholder="Filter by Created Date"
+            className="w-full border-none p-2 rounded bg-primary text-xs col-span-1 shadow-md placeholder-primary-dimmed"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            onFocus={(e) => e.target.type = "date"}
+          />
+          <select
+            className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed"
+            value={filterInsuranceProgram}
+            onChange={(e) => setFilterInsuranceProgram(e.target.value)}
+          >
+            <option value="">Filter by Insurance Program</option>
+            <option value="continuous_coverage">Continuous Coverage</option>
+          </select>
+          <select
+            className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">Filter by Application Status</option>
+            <option value="New">New</option>
+            <option value="Underreview">Under Review</option>
+            <option value="Incomplete">Incomplete</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <select
+            className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed"
+            value={filterSource}
+            onChange={(e) => setFilterSource(e.target.value)}
+          >
+            <option value="">Filter by Source</option>
+            <option value="OnBoarding">On Boarding</option>
+            <option value="PublicAPI">Public API</option>
+          </select>
+        </div>
       </div>
 
       <div className={`transition-opacity duration-300 ease-in-out ${data.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
-        <table className="table-auto bg-primary w-full rounded-lg text-xs overflow-hidden">
+        <table className="table-auto bg-primary w-full rounded-md text-xs shadow-md overflow-hidden">
           <thead>
             <tr>
               <th className="p-4 text-start text-primary-dimmed uppercase tracking-widest font-normal">
@@ -227,24 +234,29 @@ const Table: React.FC = () => {
                   key={row.id}
                   className="table-row transition-all duration-50 hover:bg-primary-hover font-normal border-primary-hover overflow-hidden border-t"
                 >
-
-                  <td className="px-4 py-2">{row.createdDate.toDateString()}</td>
-                  <td
-                    className={`px-4 py-2 ${updatedRowIds.has(String(row.id))
-                      ? "bg-briefly-changed"
-                      : ""
-                      }`}
-                  >
+                  <td className="px-4 py-2">
+                    {row.createdDate?.toDateString()}
+                  </td>
+                  <td className="px-4 py-2">
                     {row.status}
                   </td>
-                  <td className="px-4 py-2">{row.businessName}</td>
-                  <td className="px-4 py-2">{row.contactName}</td>
-                  <td className="px-4 py-2">{row.insuranceProgram}</td>
-                  <td className="px-4 py-2">{row.source}</td>
-                  <td
-                    className="px-4 py-2"
-                    onClick={() => navigateToApplicantDetailPage(row)}
-                  >
+                  <td className="px-4 py-2">
+                    <p className="truncate w-40">
+                      {row.businessName?.length > 1 ? row.businessName : <span className="text-yellow-500">Missing</span>}
+                    </p>
+                  </td>
+                  <td className="px-4 py-2">
+                    <p className="truncate w-40">
+                      {row.contactName?.length > 1 ? row.contactName : <span className="text-yellow-500">Missing</span>}
+                    </p>
+                  </td>
+                  <td className="px-4 py-2">
+                    {row.insuranceProgram}
+                  </td>
+                  <td className="px-4 py-2">
+                    {row.source}
+                  </td>
+                  <td className="px-4 py-2" onClick={() => navigateToApplicantDetailPage(row)}>
                     <Icon
                       icon="arrow-right-to-line solid"
                       className="cursor-pointer mr-1 text-primary-dimmed hover:text-primary"
@@ -254,21 +266,13 @@ const Table: React.FC = () => {
                 </tr>
               </React.Fragment>
             ))}
-            {/* empty row */}
-            {data.length == 0 &&
-              Array.from({ length: displayedRowCount - data.length }, (_, i) => (
-                <tr
-                  key={`empty-row-${i}`}
-                  className="table-row w-full font-normal overflow-hidden relative"
-                ></tr>
-              ))}
           </tbody>
           {data.length > displayedRowCount && (
             <tfoot>
               <tr>
                 <td colSpan={8} className="text-center p-4">
                   <button
-                    className="font-normal text-sm bg-primary py-2 px-4 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
+                    className="font-normal text-sm border border-primary-dimmed px-6 py-1 rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md"
                     onClick={loadMoreRows}
                   >
                     Load more data
