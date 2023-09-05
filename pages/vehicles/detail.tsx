@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import Head from 'next/head';
 
 export default function VehicleInfoPage() {
   const router = useRouter();
@@ -51,18 +52,21 @@ export default function VehicleInfoPage() {
   };
 
 
-  if(loading) return (
+  if (loading) return (
     <div className="flex flex-col min-h-screen w-full p-12">
       <div className=""></div>
-        <h1 className="text-6xl p-2">Vehicle Details <span className='font-sans font-normal underline' >{vin}</span></h1>
-        <div className='flex flex-col items-start mt-4 relative'>
-          <h2>Loading...</h2>
-        </div>
+      <h1 className="text-6xl p-2">Vehicle Details <span className='font-sans font-normal underline' >{vin}</span></h1>
+      <div className='flex flex-col items-start mt-4 relative'>
+        <h2>Loading...</h2>
       </div>
+    </div>
   )
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Head >
+        <title>{vin}</title>
+      </Head>
       <div className="p-12">
         <h1 className="text-6xl p-2">Vehicle Details <span className='font-sans font-normal underline' >{vin}</span></h1>
         {currentCheck ?
