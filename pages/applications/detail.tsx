@@ -153,11 +153,30 @@ const ApplicationDetail = () => {
       });
     }
   }
+  async function updateField(field: string, value: any, isBusinessAddress: boolean = false) {
+    if (!application) return;
+    const updatedApplication = JSON.parse(JSON.stringify(application));
+    if (isBusinessAddress) {
+      if (!updatedApplication.applicationData.businessAddress) {
+        updatedApplication.applicationData.businessAddress = {};
+      }
+      updatedApplication.applicationData.businessAddress[field] = value;
+    } else {
+      updatedApplication.applicationData[field] = value;
+    }
 
-  const goToUnderwritingReport = (vin: string) => {
-    router.push(`/vehicles/detail?vin=${vin}`);
+    try {
+      const response = await axios.put(`/api/applications/${id}/update?token=${token}`, {
+        applicationData: updatedApplication.applicationData,
+      });
+
+      if (response.status === 200) {
+        fetchApplication();
+      }
+    } catch (error: any) {
+      console.error("Failed to update the field:", error.message);
+    }
   }
-
 
   const renderApplicationDetails = () => {
     if (loading || !id || !application?.applicationData) {
@@ -166,7 +185,6 @@ const ApplicationDetail = () => {
       return (
         <div className="flex flex-col">
           <div className="flex md:flex-row mt-4" >
-            {/* Business Information */}
             <div className="w-3/4 bg-primary p-4 rounded shadow-md">
               <div className="flex flex-row justify-between w-full items-center">
                 <h3 className="font-medium">Business Information</h3>
@@ -177,56 +195,173 @@ const ApplicationDetail = () => {
                   />
                 </button>
               </div>
-
-              {/* Business Fields Here */}
-              <div className="flex flex-row flex-wrap">
+              {!editMode ?
                 <div>
-                  <label className="text-xs text-primary-dimmed">Business Name</label>
-                  <p className="truncate">{String(application.applicationData.businessName).length > 1 ? application.applicationData.businessName : <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-row flex-wrap">
+                    <div>
+                      <label className="text-xs text-primary-dimmed">Business Name</label>
+                      <a className="flex flex-row items-center" href={`${process.env.NEXT_PUBLIC_PADDOCKS_URL}/company/${id}`} target="_blank">
+                        <p title="Go to the company page in paddocks" className="mr-1 underline cursor-pointer truncate">{String(application.applicationData.businessName).length > 1 ? application.applicationData.businessName : <span className="text-yellow-500">Missing</span>}</p>
+                      </a>
+                    </div>
+                    <div className="ml-10">
+                      <label className="text-xs text-primary-dimmed">EIN</label>
+                      <p>{String(application.applicationData.ein).length > 1 ? application.applicationData.ein : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                    {application.applicationData.dot && <div className="ml-10">
+                      <label className="text-xs text-primary-dimmed">DOT</label>
+                      <p>{String(application.applicationData.dot).length > 1 ? application.applicationData.dot : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>}
+                  </div>
+                  <div className="flex flex-row mt-4">
+                    <div>
+                      <label className="text-xs text-primary-dimmed">First Name</label>
+                      <p>{String(application.applicationData?.applicant?.firstName).length > 1 ? application.applicationData.applicant?.firstName : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                    <div className="ml-10">
+                      <label className="text-xs text-primary-dimmed">Last Name</label>
+                      <p>{String(application.applicationData?.applicant?.lastName).length > 1 ? application.applicationData.applicant?.lastName : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                    <div className="ml-10">
+                      <label className="text-xs text-primary-dimmed">Email</label>
+                      <p>{String(application.applicationData?.applicant?.email).length > 1 ? application.applicationData.applicant?.email : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                    <div className="ml-10">
+                      <label className="text-xs text-primary-dimmed">Phone</label>
+                      <p>{String(application.applicationData?.applicant?.phone).length > 1 ? application.applicationData.applicant?.phone : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className="text-xs text-primary-dimmed">Business Address</label>
+                    <p>
+                      {application.applicationData.businessAddress ? compositeAddress : <span className="text-yellow-500">Missing</span>}
+                    </p>
+                  </div>
+                  <div className="mt-4 flex flex-row">
+                    <div>
+                      <label className="text-xs text-primary-dimmed">Insurance Program</label>
+                      <p>{application.insuranceProgramName ? `${application.insuranceProgramName.replace(/_/g, ' ')} v${application.insuranceProgramSchemaVersion}` : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                    <div className="ml-4">
+                      <label className="text-xs text-primary-dimmed">Fleet Size</label>
+                      <p>{String(application.applicationData.fleetSize).length > 0 ? application.applicationData.fleetSize : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-10">
-                  <label className="text-xs text-primary-dimmed">EIN</label>
-                  <p>{String(application.applicationData.ein).length > 1 ? application.applicationData.ein : <span className="text-yellow-500">Missing</span>}</p>
-                </div>
-                {application.applicationData.dot && <div className="ml-10">
-                  <label className="text-xs text-primary-dimmed">DOT</label>
-                  <p>{String(application.applicationData.dot).length > 1 ? application.applicationData.dot : <span className="text-yellow-500">Missing</span>}</p>
-                </div>}
-              </div>
-              <div className="flex flex-row mt-4">
+                :
                 <div>
-                  <label className="text-xs text-primary-dimmed">First Name</label>
-                  <p>{String(application.applicationData?.applicant?.firstName).length > 1 ? application.applicationData.applicant?.firstName : <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-row flex-wrap gap-y-4">
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Business Name</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={String(application.applicationData.businessName)}
+                        onChange={(e) => updateField('businessName', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">EIN</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={String(application.applicationData.ein)}
+                        onChange={(e) => updateField('ein', e.target.value)}
+                      />
+                    </div>
+                    {application.applicationData.dot && <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">DOT</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData.dot}
+                        onChange={(e) => updateField('dot', e.target.value)}
+                      />
+                    </div>}
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">First Name</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData?.applicant?.firstName}
+                        onChange={(e) => updateField('applicant.firstName', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Last Name</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData?.applicant?.lastName}
+                        onChange={(e) => updateField('applicant.lastName', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Email</label>
+                      <input
+                        type="email"
+                        className="bg-primary"
+                        value={application.applicationData?.applicant?.email}
+                        onChange={(e) => updateField('applicant.email', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Phone</label>
+                      <input
+                        type="tel"
+                        className="bg-primary"
+                        value={application.applicationData?.applicant?.phone}
+                        onChange={(e) => updateField('applicant.phone', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Street</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData.businessAddress?.addressLine1 || ''}
+                        onChange={(e) => updateField('businessAddress.addressLine1', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Street</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData.businessAddress?.addressLine2 || ''}
+                        onChange={(e) => updateField('businessAddress.addressLine2', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">City</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData.businessAddress?.city || ''}
+                        onChange={(e) => updateField('businessAddress.city', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">State</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData.businessAddress?.state || ''}
+                        onChange={(e) => updateField('businessAddress.state', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col mr-4">
+                      <label className="text-xs text-primary-dimmed">Zip Code</label>
+                      <input
+                        type="text"
+                        className="bg-primary"
+                        value={application.applicationData.businessAddress?.zip || ''}
+                        onChange={(e) => updateField('businessAddress.zip', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-10">
-                  <label className="text-xs text-primary-dimmed">Last Name</label>
-                  <p>{String(application.applicationData?.applicant?.lastName).length > 1 ? application.applicationData.applicant?.lastName : <span className="text-yellow-500">Missing</span>}</p>
-                </div>
-                <div className="ml-10">
-                  <label className="text-xs text-primary-dimmed">Email</label>
-                  <p>{String(application.applicationData?.applicant?.email).length > 1 ? application.applicationData.applicant?.email : <span className="text-yellow-500">Missing</span>}</p>
-                </div>
-                <div className="ml-10">
-                  <label className="text-xs text-primary-dimmed">Phone</label>
-                  <p>{String(application.applicationData?.applicant?.phone).length > 1 ? application.applicationData.applicant?.phone : <span className="text-yellow-500">Missing</span>}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <label className="text-xs text-primary-dimmed">Business Address</label>
-                <p>
-                  {application.applicationData.businessAddress ? compositeAddress : <span className="text-yellow-500">Missing</span>}
-                </p>
-              </div>
-              <div className="mt-4 flex flex-row">
-                <div>
-                  <label className="text-xs text-primary-dimmed">Insurance Program</label>
-                  <p>{application.insuranceProgramName ? `${application.insuranceProgramName.replace(/_/g, ' ')} v${application.insuranceProgramSchemaVersion}` : <span className="text-yellow-500">Missing</span>}</p>
-                </div>
-                <div className="ml-4">
-                  <label className="text-xs text-primary-dimmed">Fleet Size</label>
-                  <p>{String(application.applicationData.fleetSize).length > 0 ? application.applicationData.fleetSize : <span className="text-yellow-500">Missing</span>}</p>
-                </div>
-              </div>
+              }
             </div>
 
             {/* Application Statuses */}
@@ -400,43 +535,45 @@ const ApplicationDetail = () => {
           </div>
 
           {/* Vehicles */}
-          <div className="bg-primary mt-8 py-4 rounded shadow-md w-full">
+          <div className="bg-primary mt-8 pt-4 rounded shadow-md w-full">
             <div className="px-4">
               <h3 className="font-medium">Vehicles</h3>
             </div>
             <div className="flex flex-col mt-4">
               {vehicles.map((vehicle: any, index) => (
-                <div key={index} className="flex flex-row items-center justify-between p-4 border-t border-primary-dimmed">
+                <div key={index} className="grid grid-rows-1 grid-cols-12 gap-x-8 p-4 border-t border-primary-dimmed">
 
-                  <div className="flex flex-col">
-                    <p className="text-primary-dimmed">Vin</p>
-                    <p className="text-primary">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col col-span-3 h-full">
+                    <p className="text-primary-dimmed text-sm">Vin</p>
+                    <p className="text-primary mt-2">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
                   <div className="flex flex-col">
-                    <p className="text-primary-dimmed">Mileage</p>
-                    <p className="text-primary">{vehicle.content.mileage || <span className="text-yellow-500">Missing</span>}</p>
+                    <p className="text-primary-dimmed text-sm">Mileage</p>
+                    <p className="text-primary mt-2">{vehicle.content.mileage || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col">
-                    <p className="text-primary-dimmed">Registration State</p>
-                    <p className="text-primary">{vehicle.content.vehicleRegistrationState || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col col-span-2">
+                    <p className="text-primary-dimmed text-sm">Registration State</p>
+                    <p className="text-primary mt-2">{vehicle.content.registrationState || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col">
-                    <p className="text-primary-dimmed">License Plate</p>
-                    <p className="text-primary">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col col-span-2">
+                    <p className="text-primary-dimmed text-sm">License Plate</p>
+                    <p className="text-primary mt-2">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col">
-                    <p className="text-primary-dimmed">Nickname</p>
-                    <p className="text-primary">{vehicle.content.nickname || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col col-span-2">
+                    <p className="text-primary-dimmed text-sm">Nickname</p>
+                    <p className="text-primary mt-2">{vehicle.content.nickName || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col">
-                    <button onClick={() => { goToUnderwritingReport(vehicle.content.vin) }} className="text-white bg-blue-500 hover:bg-blue-700 p-2 rounded">
-                      Underwriting Report
-                    </button>
+                  <div className="flex flex-col col-span-2">
+                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank">
+                      <button className="text-white bg-blue-500 hover:bg-blue-700 p-2 rounded">
+                        Underwriting Report
+                      </button>
+                    </a>
                   </div>
 
                 </div>
@@ -490,7 +627,7 @@ const ApplicationDetail = () => {
 
           </div>
 
-        </div>);
+        </div >);
     }
   };
 
