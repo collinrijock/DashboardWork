@@ -8,19 +8,20 @@ export default async function handler(
   if (req.method === "PUT") {
     const { id, token } = req.query;
     const { applicationData } = req.body;
-    console.log("applicationData", applicationData);
+    const data = { id, applicationData:JSON.stringify(applicationData) };
+    console.log("applicationData", data);
     try {
       const response = await axios({
         method: "PUT",
         url: `${process.env.LULA_API_URL}/embedded/v1/application/application-data`,
-        data: { id, applicationData },
+        data,
         headers: {
           "x-source": "dashboard",
           ...(token && { "x-firebase-auth": token }),
         },
       });
 
-      if (response.status === 200) {
+      if (response.status < 400) {
         res.status(200).json({ message: "Successfully updated" });
       } else {
         console.log("response", response);
@@ -33,6 +34,6 @@ export default async function handler(
         .json({ error: "Failed to make API request", message: error.message });
     }
   } else {
-    res.status(405).json({ error: "Method not allowed" }); // Handle methods other than PUT
+    res.status(405).json({ error: "Method not allowed" });
   }
 }

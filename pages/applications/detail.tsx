@@ -153,26 +153,31 @@ const ApplicationDetail = () => {
       });
     }
   }
-  async function updateField(field: string, value: any, isBusinessAddress: boolean = false) {
+  async function updateField(fieldPath: string[], value: string) {
     if (!application) return;
-    const updatedApplication = JSON.parse(JSON.stringify(application));
-    if (isBusinessAddress) {
-      if (!updatedApplication.applicationData.businessAddress) {
-        updatedApplication.applicationData.businessAddress = {};
+
+    const updatedApplicationData = { ...application.applicationData };
+
+    let target : any = updatedApplicationData;
+    for (let i = 0; i < fieldPath.length - 1; i++) {
+      if (typeof target[fieldPath[i]] !== 'object') {
+        target[fieldPath[i]] = {};
       }
-      updatedApplication.applicationData.businessAddress[field] = value;
-    } else {
-      updatedApplication.applicationData[field] = value;
+      target = target[fieldPath[i]];
     }
 
-    try {
-      const response = await axios.put(`/api/applications/${id}/update?token=${token}`, {
-        applicationData: updatedApplication.applicationData,
-      });
+    target[fieldPath[fieldPath.length - 1]] = value;
 
-      if (response.status === 200) {
-        fetchApplication();
-      }
+    setApplication({
+      ...application,
+      applicationData: updatedApplicationData,
+    });
+
+    try {
+      await axios.put(`/api/applications/${id}/update?token=${token}`, {
+        applicationData: updatedApplicationData,
+      });
+      fetchApplication();
     } catch (error: any) {
       console.error("Failed to update the field:", error.message);
     }
@@ -188,12 +193,12 @@ const ApplicationDetail = () => {
             <div className="w-3/4 bg-primary p-4 rounded shadow-md">
               <div className="flex flex-row justify-between w-full items-center">
                 <h3 className="font-medium">Business Information</h3>
-                <button className="bg-primary text-primary rounded p-2" onClick={() => setEditMode(!editMode)}>
+                {!terminalStatuses.includes(applicationStatus) && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditMode(!editMode)}>
                   <Icon
                     className="fa-regular cursor-pointer opacity-50"
                     icon="pen"
                   />
-                </button>
+                </button>}
               </div>
               {!editMode ?
                 <div>
@@ -227,7 +232,7 @@ const ApplicationDetail = () => {
                       <p>{String(application.applicationData?.applicant?.email).length > 1 ? application.applicationData.applicant?.email : <span className="text-yellow-500">Missing</span>}</p>
                     </div>
                     <div className="ml-10">
-                      <label className="text-xs text-primary-dimmed">Phone</label>
+                      <label className="text-xws text-primary-dimmed">Phone</label>
                       <p>{String(application.applicationData?.applicant?.phone).length > 1 ? application.applicationData.applicant?.phone : <span className="text-yellow-500">Missing</span>}</p>
                     </div>
                   </div>
@@ -257,7 +262,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={String(application.applicationData.businessName)}
-                        onChange={(e) => updateField('businessName', e.target.value)}
+                        onChange={(e) => updateField(['businessName'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -266,7 +271,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={String(application.applicationData.ein)}
-                        onChange={(e) => updateField('ein', e.target.value)}
+                        onChange={(e) => updateField(['ein'], e.target.value)}
                       />
                     </div>
                     {application.applicationData.dot && <div className="flex flex-col mr-4">
@@ -275,7 +280,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.dot}
-                        onChange={(e) => updateField('dot', e.target.value)}
+                        onChange={(e) => updateField(['dot'], e.target.value)}
                       />
                     </div>}
                     <div className="flex flex-col mr-4">
@@ -284,7 +289,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.firstName}
-                        onChange={(e) => updateField('applicant.firstName', e.target.value)}
+                        onChange={(e) => updateField(['applicant','firstName'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -293,7 +298,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.lastName}
-                        onChange={(e) => updateField('applicant.lastName', e.target.value)}
+                        onChange={(e) => updateField(['applicant','lastName'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -302,7 +307,7 @@ const ApplicationDetail = () => {
                         type="email"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.email}
-                        onChange={(e) => updateField('applicant.email', e.target.value)}
+                        onChange={(e) => updateField(['applicant','email'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -311,7 +316,7 @@ const ApplicationDetail = () => {
                         type="tel"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.phone}
-                        onChange={(e) => updateField('applicant.phone', e.target.value)}
+                        onChange={(e) => updateField(['applicant','phone'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -320,7 +325,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.addressLine1 || ''}
-                        onChange={(e) => updateField('businessAddress.addressLine1', e.target.value)}
+                        onChange={(e) => updateField(['businessAddress','addressLine1'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -329,16 +334,16 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.addressLine2 || ''}
-                        onChange={(e) => updateField('businessAddress.addressLine2', e.target.value)}
+                        onChange={(e) => updateField(['businessAddress','addressLine2'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
-                      <label className="text-xs text-primary-dimmed">City</label>
+                      <label className="text-xs text-primary-dimmed, true">City</label>
                       <input
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.city || ''}
-                        onChange={(e) => updateField('businessAddress.city', e.target.value)}
+                        onChange={(e) => updateField(['businessAddress','city'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -347,7 +352,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.state || ''}
-                        onChange={(e) => updateField('businessAddress.state', e.target.value)}
+                        onChange={(e) => updateField(['businessAddress','state'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -356,7 +361,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.zip || ''}
-                        onChange={(e) => updateField('businessAddress.zip', e.target.value)}
+                        onChange={(e) => updateField(['businessAddress','zip'], e.target.value)}
                       />
                     </div>
                   </div>
@@ -368,12 +373,12 @@ const ApplicationDetail = () => {
             <div className="w-1/4 bg-primary p-4 rounded ml-2 shadow-md">
               <div className="flex flex-row justify-between w-full items-center">
                 <h3 className="font-medium">Application Statuses</h3>
-                <button className="bg-primary text-primary rounded p-2" onClick={() => setEditStatus(!editStatus)}>
+                {!terminalStatuses.includes(applicationStatus) && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditStatus(!editStatus)}>
                   <Icon
                     className="fa-regular cursor-pointer opacity-50"
                     icon="pen"
                   />
-                </button>
+                </button>}
               </div>
               <div className="flex flex-row items-center justify-between my-4 border-primary-dimmed border-b">
                 <p className="text-sm">Overall</p>
