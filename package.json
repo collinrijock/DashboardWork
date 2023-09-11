@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.0",
+    "@google-cloud/storage": "^7.0.1",
     "@heroicons/react": "^2.0.16",
     "@lula-technologies-inc/lux": "^0.2.20",
     "@tailwindcss/forms": "^0.5.3",
@@ -20,11 +22,10 @@
     "clsx": "^1.2.1",
     "eslint": "8.44.0",
     "eslint-config-next": "13.2.4",
-    "firebase": "^9.19.1",
-    "firebase-admin": "^11.7.0",
     "flowbite": "^1.6.4",
     "flowbite-react": "^0.4.2",
     "formdata": "^0.10.4",
+    "jose": "^4.14.4",
     "multer": "^1.4.5-lts.1",
     "next": "13.2.4",
     "react": "18.2.0",

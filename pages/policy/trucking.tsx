@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import Head from 'next/head';
+import { useAuthContext } from '@/hooks/auth';
 
 const PostPolicy = () => {
     const [accountEntityId, setAccountEntityId] = useState('');
@@ -8,7 +8,7 @@ const PostPolicy = () => {
     const [limit, setLimit] = useState('');
     const [deductible, setDeductible] = useState('');
     const [recentRequests, setRecentRequests] = useState<string[]>([]);
-    const { token } = useFirebaseAuth();
+    const { getToken } = useAuthContext();
     const [loading, setLoading] = useState(false);
 
     const handleNumberInput = (event: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
@@ -20,11 +20,12 @@ const PostPolicy = () => {
         event.preventDefault();
         setLoading(true);
         try {
+            const token = await getToken();
             const response = await fetch("/api/policies", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token && { "x-firebase-auth": token }),
+                    ...(token && { "Authorization": `Bearer ${token}` }),
                 },
                 body: JSON.stringify({
                     accountEntityId,

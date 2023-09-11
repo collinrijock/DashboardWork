@@ -3,7 +3,7 @@ import "tailwindcss/tailwind.css";
 import { useRouter } from "next/router";
 import { Icon } from "@lula-technologies-inc/lux";
 import { TableRow } from "../types/TableRow";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useAuthContext } from "@/hooks/auth";
 
 const Table: React.FC = () => {
   // Router
@@ -17,7 +17,7 @@ const Table: React.FC = () => {
   const [filterDocuments, setFilterDocument] = useState(false);
   const [displayedRowCount, setDisplayedRowCount] = useState(15);
   const [updatedRowIds, setUpdatedRowIds] = useState<Set<string>>(new Set());
-  const { token } = useFirebaseAuth();
+  const { getToken } = useAuthContext();
   const [firstLoad, setFirstLoad] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -45,9 +45,10 @@ const Table: React.FC = () => {
           ...(filterSource && { source: filterSource }),
         });
         let headers: HeadersInit = {};
+        const token = await getToken();
         if (token) {
           headers = {
-            "x-firebase-auth": token,
+            "Authorization": `Bearer ${token}`,
           };
         }
         const response = await fetch(`/api/applications?${queryParams}`, {
@@ -88,15 +89,18 @@ const Table: React.FC = () => {
         setData([]);
       }
     },
-    [filterDocuments, token]
+    [filterDocuments]
   );
 
   useEffect(() => {
-    if (token) {
+    const effect = async () => {
+      const token = await getToken();
+      if (!token) return;
+        
       // If it's the first load, fetch immediately and set firstLoad to false
       if (firstLoad) {
-        fetchData(search, filterDate, filterInsuranceProgram, filterStatus, filterSource);
         setFirstLoad(false);
+        await fetchData(search, filterDate, filterInsuranceProgram, filterStatus, filterSource);
       } else {
         // If not the first load, then add the debounce
         const timeoutId = window.setTimeout(() => {
@@ -107,6 +111,7 @@ const Table: React.FC = () => {
         return () => window.clearTimeout(timeoutId);
       }
     }
+    effect()
   }, [
     fetchData,
     search,
@@ -114,9 +119,8 @@ const Table: React.FC = () => {
     filterInsuranceProgram,
     filterStatus,
     filterSource,
-    token,
     firstLoad,
-    filterDocuments
+    filterDocuments,
   ]);
 
   const navigateToApplicantDetailPage = (row: TableRow) => {
