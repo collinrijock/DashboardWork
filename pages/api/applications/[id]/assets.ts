@@ -6,7 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
-    const { id, token } = req.query;
+    const { id } = req.query;
+    const authorization = req.headers.authorization;
     const url = `${process.env.LULA_API_URL}/embedded/v1/application/${id}/assets`;
     let assets = [];
     try {
@@ -14,8 +15,8 @@ export default async function handler(
         method: "GET",
         url,
         headers: {
-          "x-source": "dashboard",
-          ...(token && { "x-firebase-auth": token }),
+          "X-Source": "dashboard",
+          ...(authorization && { Authorization: authorization }),
         },
         validateStatus: function (status) {
           return status < 500;

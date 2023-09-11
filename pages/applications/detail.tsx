@@ -49,7 +49,11 @@ const ApplicationDetail = () => {
       setComments(commentJson);
 
       // fetch vehicles
-      const vehicleData = await fetch(`/api/applications/${id}/assets?token=${token}`, { headers: { "x-firebase-auth": token || "" } });
+      const vehicleData = await fetch(`/api/applications/${id}/assets`, { 
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const vehicleJson = await vehicleData.json();
       setVehicles(vehicleJson);
 
@@ -171,6 +175,8 @@ const ApplicationDetail = () => {
   }
   async function updateField(fieldPath: string[], value: string) {
     if (!application) return;
+    const token = await getToken();
+    if (!token) return;
 
     const updatedApplicationData = { ...application.applicationData };
 
@@ -190,8 +196,12 @@ const ApplicationDetail = () => {
     });
 
     try {
-      await axios.put(`/api/applications/${id}/update?token=${token}`, {
+      await axios.put(`/api/applications/${id}/update`, {
         applicationData: updatedApplicationData,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
       fetchApplication();
     } catch (error: any) {
