@@ -33,7 +33,7 @@ export default function VehicleInfoPage() {
     if (vin && isAuthenticated) {
       fetchUnderwritingChecks(String(vin));
     }
-  }, [vin, isAuthenticated, getToken]);
+  }, [vin, isAuthenticated]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
