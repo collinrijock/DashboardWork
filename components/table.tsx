@@ -121,7 +121,6 @@ const Table: React.FC = () => {
     filterSource,
     firstLoad,
     filterDocuments,
-    getToken
   ]);
 
   const navigateToApplicantDetailPage = (row: TableRow) => {
