@@ -6,9 +6,10 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PUT") {
-    const { id, token } = req.query;
+    const { id } = req.query;
     const { applicationData } = req.body;
-    const data = { id, applicationData:JSON.stringify(applicationData) };
+    const authorization = req.headers.authorization;
+    const data = { id, applicationData: JSON.stringify(applicationData) };
     console.log("applicationData", data);
     try {
       const response = await axios({
@@ -16,8 +17,8 @@ export default async function handler(
         url: `${process.env.LULA_API_URL}/embedded/v1/application/application-data`,
         data,
         headers: {
-          "x-source": "dashboard",
-          ...(token && { "x-firebase-auth": token }),
+          "X-Source": "dashboard",
+          ...(authorization && { Authorization: authorization }),
         },
       });
 

@@ -38,6 +38,7 @@ export default async function handler(
     const documentType = req.body.documentType as string;
     const documentName = req.body.documentName as string;
     const applicationId = req.body.applicationId as string;
+    const authorization = req.headers.authorization;
 
     const supportedFileTypes = [
       "application/pdf",
@@ -62,13 +63,16 @@ export default async function handler(
     }
 
     const currentDate = new Date();
-    const formattedDate = currentDate.toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
+    const formattedDate = currentDate
+      .toISOString()
+      .replace(/[:-]/g, "")
+      .replace(/\.\d{3}/, "");
     const fileName = `${formattedDate}-${documentName}`;
 
-    bucket.file(`${applicationId}/${fileName}`).save(file.buffer,{
-      contentType: file.mimetype,resumable: false
+    bucket.file(`${applicationId}/${fileName}`).save(file.buffer, {
+      contentType: file.mimetype,
+      resumable: false,
     });
-
 
     const fileLocation = `/${bucketName}/${applicationId}/${fileName}`;
     const backendBody = {
@@ -81,9 +85,9 @@ export default async function handler(
 
     const url = `${process.env.LULA_API_URL}/embedded/v1/application/documents`;
     const headers = {
-      "x-firebase-auth": req.headers["x-firebase-auth"],
-      "content-type": "application/json",
-      "x-source": "test",
+      Authorization: authorization,
+      "Content-Type": "application/json",
+      "X-Source": "test",
     };
 
     axios
@@ -93,7 +97,8 @@ export default async function handler(
       })
       .catch((error) => {
         res.status(500).json({
-          message: "An error occurred while processing the request to the backend.",
+          message:
+            "An error occurred while processing the request to the backend.",
           error: error,
         });
       });

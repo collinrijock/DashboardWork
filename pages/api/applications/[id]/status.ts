@@ -2,18 +2,26 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
 import { IncomingHttpHeaders } from "http";
 
-
-const sendEmail = async (id: string, status: string, headers: IncomingHttpHeaders ) => {
+const sendEmail = async (
+  id: string,
+  status: string,
+  headers: IncomingHttpHeaders
+) => {
   const url = `${process.env.LULA_ONBOARDING_API_URL}/account/${id}/application`;
-  if(status.toLowerCase() === 'approved' || status.toLowerCase() === "rejected") {
-    const data = { applicationApproved: status.toLowerCase() === 'approved' ? true : false };
+  if (
+    status.toLowerCase() === "approved" ||
+    status.toLowerCase() === "rejected"
+  ) {
+    const data = {
+      applicationApproved: status.toLowerCase() === "approved" ? true : false,
+    };
     try {
       await axios({
         method: "post",
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `bearer ${headers["x-firebase-auth"] as string}`,
+          Authorization: headers.authorization,
         },
         data,
       });
@@ -23,13 +31,14 @@ const sendEmail = async (id: string, status: string, headers: IncomingHttpHeader
       return false;
     }
   }
-}
+};
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
     const { id, status, statusNote } = req.body;
+    const authorization = req.headers.authorization;
     const data = {
       id,
       status,
@@ -43,7 +52,7 @@ export default async function handler(
         url,
         headers: {
           "Content-Type": "application/json",
-          "x-firebase-auth": req.headers["x-firebase-auth"] as string,
+          Authorization: authorization,
           "x-source": "dashboard",
         },
         data,
