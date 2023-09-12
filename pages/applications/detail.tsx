@@ -158,7 +158,7 @@ const ApplicationDetail = () => {
 
     const updatedApplicationData = { ...application.applicationData };
 
-    let target : any = updatedApplicationData;
+    let target: any = updatedApplicationData;
     for (let i = 0; i < fieldPath.length - 1; i++) {
       if (typeof target[fieldPath[i]] !== 'object') {
         target[fieldPath[i]] = {};
@@ -172,12 +172,18 @@ const ApplicationDetail = () => {
       ...application,
       applicationData: updatedApplicationData,
     });
+  }
 
+  async function updateApplication() {
+    if (!application) return;
     try {
       await axios.put(`/api/applications/${id}/update?token=${token}`, {
-        applicationData: updatedApplicationData,
+        applicationData: application.applicationData,
       });
-      fetchApplication();
+      // Fetch application data
+      const response = await fetch(`/api/applications/${id}?token=${token}`);
+      const data = await response.json();
+      setApplication(data);
     } catch (error: any) {
       console.error("Failed to update the field:", error.message);
     }
@@ -289,7 +295,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.firstName}
-                        onChange={(e) => updateField(['applicant','firstName'], e.target.value)}
+                        onChange={(e) => updateField(['applicant', 'firstName'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -298,7 +304,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.lastName}
-                        onChange={(e) => updateField(['applicant','lastName'], e.target.value)}
+                        onChange={(e) => updateField(['applicant', 'lastName'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -307,7 +313,7 @@ const ApplicationDetail = () => {
                         type="email"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.email}
-                        onChange={(e) => updateField(['applicant','email'], e.target.value)}
+                        onChange={(e) => updateField(['applicant', 'email'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -316,7 +322,7 @@ const ApplicationDetail = () => {
                         type="tel"
                         className="bg-primary"
                         value={application.applicationData?.applicant?.phone}
-                        onChange={(e) => updateField(['applicant','phone'], e.target.value)}
+                        onChange={(e) => updateField(['applicant', 'phone'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -325,7 +331,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.addressLine1 || ''}
-                        onChange={(e) => updateField(['businessAddress','addressLine1'], e.target.value)}
+                        onChange={(e) => updateField(['businessAddress', 'addressLine1'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -334,7 +340,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.addressLine2 || ''}
-                        onChange={(e) => updateField(['businessAddress','addressLine2'], e.target.value)}
+                        onChange={(e) => updateField(['businessAddress', 'addressLine2'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -343,7 +349,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.city || ''}
-                        onChange={(e) => updateField(['businessAddress','city'], e.target.value)}
+                        onChange={(e) => updateField(['businessAddress', 'city'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -352,7 +358,7 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.state || ''}
-                        onChange={(e) => updateField(['businessAddress','state'], e.target.value)}
+                        onChange={(e) => updateField(['businessAddress', 'state'], e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col mr-4">
@@ -361,9 +367,17 @@ const ApplicationDetail = () => {
                         type="text"
                         className="bg-primary"
                         value={application.applicationData.businessAddress?.zip || ''}
-                        onChange={(e) => updateField(['businessAddress','zip'], e.target.value)}
+                        onChange={(e) => updateField(['businessAddress', 'zip'], e.target.value)}
                       />
                     </div>
+                  </div>
+                  <div>
+                    <button
+                      className="bg-secondary w-full text-primary rounded p-2 mt-4 hover:bg-primary-hover"
+                      onClick={updateApplication}
+                    >
+                      Submit
+                    </button>
                   </div>
                 </div>
               }
@@ -419,7 +433,7 @@ const ApplicationDetail = () => {
                     className="w-full text-primary bg-primary border border-gray-300 rounded"
                   />
                   <button
-                    className="bg-secondary w-full text-primary rounded p-2 mt-4"
+                    className="bg-secondary w-full text-primary rounded p-2 mt-4 hover:bg-primary-hover"
                     onClick={() => { if (statusNote.length > 0) updateApplicationStatus(applicationStatus) }}
                   >
                     Submit
