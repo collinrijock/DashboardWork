@@ -1,17 +1,17 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import axios from "axios";
 import { Application } from "@/types/application";
 import { Icon } from "@lula-technologies-inc/lux";
+import { useAuthContext } from "@/hooks/auth";
 
 const ApplicationDetail = () => {
   const router = useRouter();
   const { id } = router.query;
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
-  const { token } = useFirebaseAuth();
+  const { isAuthenticated, getToken } = useAuthContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState<string>("");
   const [documentName, setDocumentName] = useState<string | null>(null);
@@ -29,19 +29,31 @@ const ApplicationDetail = () => {
 
   const fetchApplication = async () => {
     try {
-      // fetch application
-      const response = await fetch(`/api/applications/${id}?token=${token}`);
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await fetch(`/api/applications/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}` 
+        }
+      });
       const data = await response.json();
       setApplication(data);
       setApplicationStatus(data.status);
-
-      // fetch comments
-      const commentData = await fetch(`/api/applications/${id}/comments?token=${token}`, { headers: { "x-firebase-auth": token || "" } });
+      const commentData = await fetch(`/api/applications/${id}/comments`, { 
+        headers: { 
+          "Authorization": `Bearer ${token}` 
+        }
+      });
       const commentJson = await commentData.json();
       setComments(commentJson);
 
       // fetch vehicles
-      const vehicleData = await fetch(`/api/applications/${id}/assets?token=${token}`, { headers: { "x-firebase-auth": token || "" } });
+      const vehicleData = await fetch(`/api/applications/${id}/assets`, { 
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const vehicleJson = await vehicleData.json();
       setVehicles(vehicleJson);
 
@@ -58,6 +70,9 @@ const ApplicationDetail = () => {
 
   async function updateApplicationStatus(newStatus: string) {
     try {
+      const token = await getToken();
+      if (!token) return;
+
       const data = {
         id,
         status: newStatus,
@@ -65,7 +80,7 @@ const ApplicationDetail = () => {
       };
       const response = await axios.post(`/api/applications/${id}/status`, data, {
         headers: {
-          "x-firebase-auth": token || ""
+          "Authorization": `Bearer ${token}`
         },
       });
 
@@ -89,11 +104,11 @@ const ApplicationDetail = () => {
   }
 
   useEffect(() => {
-    if (token && id) {
+    if (isAuthenticated && id) {
       fetchApplication();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, id]);
+  }, [isAuthenticated, id]);
 
   const handleFileChange = async (e: any) => {
     if (e.target.files.length) {
@@ -118,10 +133,11 @@ const ApplicationDetail = () => {
       formData.append("applicationId", id as string);
 
       try {
+        const token = await getToken();
         await axios.post(`/api/applications/${id}/documents/upload`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-            "x-firebase-auth": token || ""
+            "Authorization": `Bearer ${token}`
           },
         });
         fetchApplication();
@@ -139,22 +155,28 @@ const ApplicationDetail = () => {
     setIsDocumentsToggled(!isDocumentsToggled);
   }
 
-  const uploadComment = () => {
-    if (comment.length > 0) {
+  const uploadComment = async () => {
+    if (comment.length <= 0) return;
+    try {
       const data = {
         comment
       };
-      axios.post(`/api/applications/${id}/comment?token=${token}`, data
-      ).then(() => {
-        fetchApplication();
-        setComment("");
-      }).catch((err) => {
-        console.error(err);
-      });
+      const token = await getToken();
+      await axios.post(`/api/applications/${id}/comment`, data, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      fetchApplication();
+      setComment("");
+    } catch (err) {
+      console.error(err);
     }
   }
   async function updateField(fieldPath: string[], value: string) {
     if (!application) return;
+    const token = await getToken();
+    if (!token) return;
 
     const updatedApplicationData = { ...application.applicationData };
 

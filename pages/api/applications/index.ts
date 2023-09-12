@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const token = String(req.headers["x-firebase-auth"]);
+    const authorization = req.headers.authorization;
 
     // Create a URLSearchParams instance from req.query
     const queryParams = new URLSearchParams(
@@ -23,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
-        ...(token && { "x-firebase-auth": token }),
+        ...(authorization && { authorization: authorization }),
       },
     });
 

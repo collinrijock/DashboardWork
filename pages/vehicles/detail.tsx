@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import Head from 'next/head';
+import { useAuthContext } from '@/hooks/auth';
 
 export default function VehicleInfoPage() {
   const router = useRouter();
@@ -9,28 +9,31 @@ export default function VehicleInfoPage() {
   const [underwritingChecks, setUnderwritingChecks] = useState(Array<any>());
   const [loading, setLoading] = useState(true);
   const currentCheck = underwritingChecks[currentIndex];
-  const { token } = useFirebaseAuth();
+  const { isAuthenticated, getToken } = useAuthContext();
   const { vin } = router.query;
 
   useEffect(() => {
-    const fetchUnderwritingChecks = async (vin: string, token: string) => {
+    const fetchUnderwritingChecks = async (vin: string) => {
       try {
-        const res = await fetch(`/api/underwriting/details?vin=${vin}&token=${token}`);
+        const token = await getToken();
+        const res = await fetch(`/api/underwriting/details?vin=${vin}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const data = await res.json();
         setUnderwritingChecks(data);
       } catch (error) {
         console.error('Error fetching underwriting details:', error);
       } finally {
         setLoading(false);
-
       }
     };
 
-    if (vin && token) {
-      fetchUnderwritingChecks(String(vin), token);
-
+    if (vin && isAuthenticated) {
+      fetchUnderwritingChecks(String(vin));
     }
-  }, [vin, token]);
+  }, [vin, isAuthenticated]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
