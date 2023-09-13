@@ -207,7 +207,11 @@ const ApplicationDetail = () => {
           "Authorization": `Bearer ${token}`
         }
       });
-      const response = await fetch(`/api/applications/${id}?token=${token}`);
+      const response = await fetch(`/api/applications/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setApplication(data);
     } catch (error: any) {
