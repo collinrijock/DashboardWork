@@ -5,20 +5,21 @@ import axios from "axios";
 import { Application } from "@/types/application";
 import { Icon } from "@lula-technologies-inc/lux";
 import { useAuthContext } from "@/hooks/auth";
+import { useLaunchDarkly } from "@/hooks/useLaunchDarkly";
 
 const ApplicationDetail = () => {
   const router = useRouter();
+  const { isAuthenticated, getToken, user } = useAuthContext();
+  const { getFlag, initialized } = useLaunchDarkly({ key: user?.sub!, email: user?.email! });
   const { id } = router.query;
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated, getToken } = useAuthContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState<string>("");
   const [documentName, setDocumentName] = useState<string | null>(null);
   const [documentDescription, setDocumentDescription] = useState<string | null>(null);
   const [applicationStatus, setApplicationStatus] = useState<string>("");
   const [statusNote, setStatusNote] = useState<String>("");
-  const terminalStatuses = ["APPROVED", "REJECTED", "CANCELLED"];
   const [isDocumentsToggled, setIsDocumentsToggled] = useState<boolean>(false);
   const [comments, setComments] = useState<any[]>([]);
   const [comment, setComment] = useState<string>("");
@@ -26,6 +27,9 @@ const ApplicationDetail = () => {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editStatus, setEditStatus] = useState<boolean>(false);
   const [vehicles, setVehicles] = useState<any[]>([]);
+  const [editPrivilege, setEditPrivilege] = useState<boolean>(false);
+
+  const terminalStatuses = ["APPROVED", "REJECTED", "CANCELLED"];
 
   const fetchApplication = async () => {
     try {
@@ -93,6 +97,12 @@ const ApplicationDetail = () => {
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    if (initialized) {
+      setEditPrivilege(getFlag('applications-dashboard-editing-privileges'));
+    }
+  }, [initialized, getFlag]);
 
   // Update application status when applicationStatus changes
   const handleStatusChange = async (newStatus: string) => {
@@ -229,7 +239,7 @@ const ApplicationDetail = () => {
             <div className="w-3/4 bg-primary p-4 rounded shadow-md">
               <div className="flex flex-row justify-between w-full items-center">
                 <h3 className="font-medium">Business Information</h3>
-                {!terminalStatuses.includes(applicationStatus) && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditMode(!editMode)}>
+                {!terminalStatuses.includes(applicationStatus) && editPrivilege && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditMode(!editMode)}>
                   <Icon
                     className="fa-regular cursor-pointer opacity-50"
                     icon="pen"
@@ -417,7 +427,7 @@ const ApplicationDetail = () => {
             <div className="w-1/4 bg-primary p-4 rounded ml-2 shadow-md">
               <div className="flex flex-row justify-between w-full items-center">
                 <h3 className="font-medium">Application Statuses</h3>
-                {!terminalStatuses.includes(applicationStatus) && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditStatus(!editStatus)}>
+                {!terminalStatuses.includes(applicationStatus) && editPrivilege && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditStatus(!editStatus)}>
                   <Icon
                     className="fa-regular cursor-pointer opacity-50"
                     icon="pen"
