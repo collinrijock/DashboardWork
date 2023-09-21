@@ -27,10 +27,10 @@ export default function App({ Component, pageProps }: AppProps) {
         redirect_uri: process.env.NEXT_PUBLIC_AUTH0_REDIRECT_URI!,
         audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
       }}>
-        <Layout>
-          <Header/>
-          <Component {...pageProps} />
-        </Layout>
+      <Layout>
+        <Header />
+        <Component {...pageProps} />
+      </Layout>
     </Auth0Provider>
-    )
+  )
 }
