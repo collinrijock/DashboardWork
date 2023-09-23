@@ -37,7 +37,7 @@ const Header: FC = () => {
 
   const navLinks = [
     { label: 'Home', href: '/' },
-    { label: 'Trucking', href: '/policy/trucking' },
+    { label: 'Trucking', href: '/trucking' },
   ];
 
   useEffect(() => {
