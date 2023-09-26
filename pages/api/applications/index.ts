@@ -4,20 +4,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const authorization = req.headers.authorization;
 
-    // Create a URLSearchParams instance from req.query
-    const queryParams = new URLSearchParams(
-      req.query as { [key: string]: string }
-    );
-    // if status is not provided, send every status as a seperate param except for draft
-    if (!queryParams.has("status")) {
-      queryParams.append("status", "new");
-      queryParams.append("status", "underreview");
-      queryParams.append("status", "approved");
-      queryParams.append("status", "rejected");
-      queryParams.append("status", "cancelled");
-      queryParams.append("status", "incomplete");
-    }
-
+    // get query params and seperate the status multi params
+    const queryParams = new URLSearchParams(req.query as any).toString().replace(/%2C/g, "&status=");
     const url = `${process.env.LULA_API_URL}/embedded/v1/backoffice/search?${queryParams}`;
     console.log(`Sending request to ${url}`);
     const response = await fetch(url, {

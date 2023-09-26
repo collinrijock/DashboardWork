@@ -4,15 +4,15 @@ import { useRouter } from "next/router";
 import { Icon } from "@lula-technologies-inc/lux";
 import { TableRow } from "../types/TableRow";
 import { useAuthContext } from "@/hooks/auth";
+import Select from 'react-select'
 
 const Table: React.FC = () => {
-  // Router
-  const router = useRouter(); // State variables
+  const router = useRouter();
   const [data, setData] = useState<TableRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterInsuranceProgram, setFilterInsuranceProgram] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState<any>();
   const [filterSource, setFilterSource] = useState("");
   const [filterDocuments, setFilterDocument] = useState(false);
   const [displayedRowCount, setDisplayedRowCount] = useState(15);
@@ -20,6 +20,17 @@ const Table: React.FC = () => {
   const { getToken } = useAuthContext();
   const [firstLoad, setFirstLoad] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+
+  const options = [
+    { value: "", label: "Filter by Application Status" },
+    { value: "New", label: "New" },
+    { value: "Underreview", label: "Under Review" },
+    { value: "Incomplete", label: "Incomplete" },
+    { value: "Approved", label: "Approved" },
+    { value: "Rejected", label: "Rejected" },
+    { value: "Cancelled", label: "Cancelled" },
+    { value: "Draft", label: "Draft" },
+  ];
 
   // Functions
   const loadMoreRows = () => {
@@ -30,7 +41,7 @@ const Table: React.FC = () => {
       search: string,
       filterDate: string,
       filterInsuranceProgram: string,
-      filterStatus: string,
+      filterStatus: Array<any>,
       filterSource: string
     ) => {
       try {
@@ -41,9 +52,13 @@ const Table: React.FC = () => {
           ...(filterInsuranceProgram && {
             programName: filterInsuranceProgram,
           }),
-          ...(filterStatus && { status: filterStatus }),
           ...(filterSource && { source: filterSource }),
         });
+        if (filterStatus) {
+          filterStatus.forEach((status: any) => {
+            queryParams.append("status", status.value);
+          });
+        }
         let headers: HeadersInit = {};
         const token = await getToken();
         if (token) {
@@ -96,7 +111,7 @@ const Table: React.FC = () => {
     const effect = async () => {
       const token = await getToken();
       if (!token) return;
-        
+
       // If it's the first load, fetch immediately and set firstLoad to false
       if (firstLoad) {
         setFirstLoad(false);
@@ -179,20 +194,21 @@ const Table: React.FC = () => {
           >
             <option value="">Filter by Insurance Program</option>
             <option value="continuous_coverage">Continuous Coverage</option>
+            <option value="continuous_coverage_gba">Continuous Coverage GBA</option>
           </select>
-          <select
-            className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed"
+          <Select
+            isMulti
+            classNames={{
+              control: () => '!text-primary-dimmed !bg-primary !w-full text-xs !border-none', 
+              placeholder: () => '!text-primary-dimmed',
+              indicatorSeparator: () => '!bg-secondary',
+            }}
+            options={options}
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="">Filter by Application Status</option>
-            <option value="New">New</option>
-            <option value="Underreview">Under Review</option>
-            <option value="Incomplete">Incomplete</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+            onChange={selectedOptions => setFilterStatus(selectedOptions)}
+            placeholder="Filter by Application Status"
+            className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed !placeholder:text-primary-dimmed"
+          />
           <select
             className="w-full border-none p-2 rounded bg-primary text-xs shadow-md text-primary-dimmed"
             value={filterSource}
