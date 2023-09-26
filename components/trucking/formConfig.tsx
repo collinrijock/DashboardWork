@@ -1,10 +1,10 @@
-import { RJSFSchema } from '@rjsf/utils';
+import { RJSFSchema, SubmitButtonProps, getSubmitButtonOptions } from '@rjsf/utils';
 export const formSchema: RJSFSchema = {
-  title: "Insurance Form",
   type: "object",
   properties: {
     inputData: {
       type: "object",
+      title: "",
       properties: {
         insured: {
           type: "object",
@@ -144,49 +144,11 @@ export const formSchema: RJSFSchema = {
   }
 };
 
-
-
-export const uiSchema = {
-  "accountEntityId": {
-    "ui:widget": "text",
-    "ui:title": "Account Entity ID (Ex: 12345)",
-    "ui:options": {
-      "inputType": "text",
-    },
-    "classNames": "block w-full mt-2 p-2 border-none rounded bg-primary text-primary"
-  },
-  "policyNumber": {
-    "ui:widget": "text",
-    "ui:title": "Policy Number (Ex: E986763)",
-    "classNames": "block w-full mt-2 p-2 border-none rounded bg-primary text-primary"
-  },
-  "limit": {
-    "ui:widget": "text",
-    "ui:title": "Limit (Ex: 100,000)",
-    "classNames": "block w-full mt-2 p-2 border-none rounded bg-primary text-primary"
-  },
-  "deductible": {
-    "ui:widget": "text",
-    "ui:title": "Deductible (Ex: 2,500)",
-    "classNames": "block w-full mt-2 p-2 border-none rounded bg-primary text-primary"
-  },
-  "ui:buttons": {
-    "submit": {
-      "ui:widget": "button",
-      "classNames": "bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4"
-    },
-    "clear": {
-      "ui:widget": "button",
-      "classNames": "bg-red-600 text-white font-bold py-2 px-4 rounded"
-    }
-  }
-};
-
 const CustomTextWidget = (props: any) => {
   const { id, required, label, value, onChange } = props;
   return (
-    <div className="mt-4">
-      <label htmlFor={id} className="block">
+    <div className="mt-4 w-full">
+      <label htmlFor={id} className="">
         {label}{required ? '*' : ''}
       </label>
       <input
@@ -218,32 +180,53 @@ const CustomCheckboxWidget = (props: any) => {
   );
 };
 
-const CustomSubmit = (props: any) => {
+const CustomFieldTemplate = (props: any) => {
+  return (
+    <div className="mt-4 flex flex-col items-center w-full">
+      {props.children}
+    </div>
+  );
+}
+
+const CustomButtonWidget = (props: any) => {
+  const { id, required, label, value, onChange } = props;
   return (
     <div className="mt-4">
       <button
-        type="submit"
-        className="bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4"
-      >
-        Submit
-      </button>
-      <button
         type="button"
-        className="bg-red-600 text-white font-bold py-2 px-4 rounded"
-        onClick={props.onCancel}
+        id={id}
+        value={value}
+        className="block w-full mt-2 p-2 border-none rounded bg-primary text-primary"
       >
-        Clear Form
+        {label}{required ? '*' : ''}
       </button>
     </div>
   );
-};
+}
+
+function SubmitButton(props: SubmitButtonProps) {
+  const { uiSchema } = props;
+  const { norender } = getSubmitButtonOptions(uiSchema);
+  if (norender) {
+    return null;
+  }
+  return (
+    <button type='submit' className='bg-lula mt-10 hover:bg-primary-hover text-primary px-32  py-2 rounded-lg'>
+      Submit
+    </button>
+  );
+}
 
 export const customTheme = {
   widgets: {
     TextWidget: CustomTextWidget,
-    CheckboxWidget: CustomCheckboxWidget
+    CheckboxWidget: CustomCheckboxWidget,
+    ButtonWidget: CustomButtonWidget,
   },
   templates: {
-    SubmitTemplate: CustomSubmit
+    FieldTemplate: CustomFieldTemplate,
+    ButtonTemplates: {
+      SubmitButton
+    }
   }
 };

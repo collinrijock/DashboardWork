@@ -4,7 +4,7 @@ import PolicyForm from '@/components/trucking/Policy';
 import TruckingCOIForm from '@/components/trucking/COIGenerator';
 
 const PostPolicy = () => {
-  const [activeTab, setActiveTab] = useState('policy');
+  const [activeTab, setActiveTab] = useState('coi');
 
   return (
     <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">

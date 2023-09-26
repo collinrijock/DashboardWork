@@ -1,8 +1,8 @@
 // truckingCOI.js
 import React, { useState } from 'react';
-import { customTheme, formSchema, uiSchema } from './formConfig';
+import { customTheme, formSchema } from './formConfig';
 import validator from '@rjsf/validator-ajv8';
-import Form from '@rjsf/core';
+import Form, { withTheme } from '@rjsf/core';
 import { useAuthContext } from '@/hooks/auth';
 
 const generateCertificateNumber = () => {
@@ -15,6 +15,7 @@ const TruckingCOI = () => {
   const [jsonInput, setJsonInput] = useState("");
   const [isJSONAreaVisible, setJSONAreaVisible] = useState(false);
   const { getToken } = useAuthContext();
+  const ThemedForm = withTheme(customTheme);
 
   function populateFormWithData() {
     try {
@@ -116,12 +117,12 @@ const TruckingCOI = () => {
         </>
       )}
 
-      <Form
+      <ThemedForm
         schema={formSchema}
         formData={formData}
         validator={validator}
         onChange={(e) => setFormData(e.formData)}
-        className='w-full mt-4'
+        className='w-full mt-4 flex flex-col items-center'
         onSubmit={(e) => submitForm(e as any)}
       />
     </div>
