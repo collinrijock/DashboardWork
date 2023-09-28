@@ -121,7 +121,7 @@ const TruckingCOI = () => {
         formData={formData}
         validator={validator}
         onChange={(e) => setFormData(e.formData)}
-        className='w-full mt-4'
+        className='w-full mt-4 flex flex-col items-center'
         onSubmit={(e) => submitForm(e as any)}
       />
     </div>
