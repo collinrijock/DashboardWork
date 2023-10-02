@@ -7,14 +7,7 @@ import { Auth0Provider } from '@auth0/auth0-react';
 import Layout from "@/components/common/layout";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const darkMode = useDarkMode();
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
+  useDarkMode();
 
   return (
     <Auth0Provider
