@@ -259,6 +259,18 @@ const ApplicationDetail = () => {
                       <label className="text-xs text-primary-dimmed">EIN</label>
                       <p>{String(application.applicationData.ein).length > 1 ? application.applicationData.ein : <span className="text-yellow-500">Missing</span>}</p>
                     </div>
+                    <div className="ml-10">
+                      <label className="text-xs text-primary-dimmed">Salesforce</label>
+                      <p>{(application.salesforceId) ?
+                        <a href="https://lula.lightning.force.com/lightning/r/Account/${application.salesforceId}/view">
+                          application.salesforceId
+                          <Icon
+                            className="fa-regular cursor-pointer opacity-50"
+                            icon="external-link"
+                          />
+                        </a>
+                        : <span className="text-yellow-500">Missing</span>}</p>
+                    </div>
                     {application.applicationData.dot && <div className="ml-10">
                       <label className="text-xs text-primary-dimmed">DOT</label>
                       <p>{String(application.applicationData.dot).length > 1 ? application.applicationData.dot : <span className="text-yellow-500">Missing</span>}</p>

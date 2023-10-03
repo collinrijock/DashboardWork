@@ -37,6 +37,7 @@ export interface Application {
   status: string | null;
   tenantId: string | null;
   source: string | null;
+  salesforceId: string | null;
 }
 
 export enum ApplicationStatus {
