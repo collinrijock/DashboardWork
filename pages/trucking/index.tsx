@@ -7,11 +7,11 @@ const PostPolicy = () => {
   const [activeTab, setActiveTab] = useState('coi');
 
   return (
-    <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">
+    <div className="flex flex-col px-12 py-4 animate-fade-in bg-secondary min-h-screen">
       <Head>
         <title>Trucking Portal v0</title>
       </Head>
-      <h1 className="w-full text-6xl p-2">Trucking Portal v0</h1>
+      <h1 className="w-full text-6xl py-2">Trucking Portal v0</h1>
       <div className="flex border-b border-opacity-20 border-primary-dimmed">
         <button 
           onClick={() => setActiveTab('policy')}

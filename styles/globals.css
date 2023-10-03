@@ -6,23 +6,28 @@
 @import "./main.css";
 :root {
   --color-bg-primary: #ffffff;
-  --color-bg-primary-highlighted: #E6E6E6; 
+  --color-bg-primary-highlighted: #e6e6e6;
   --color-bg-secondary: #f0f1f3;
   --color-text-primary: #333354;
-  --color-text-primary-dimmed: #6C727F;
+  --color-text-primary-dimmed: #6c727f;
   --color-lula: rgba(255, 86, 1, 1);
 }
 
 .dark {
   --color-bg-primary: #3a3a5f; /* Darker primary color */
-  --color-bg-primary-highlighted: #4F4D72; 
+  --color-bg-primary-highlighted: #4f4d72;
   --color-bg-secondary: #333354; /* Darker secondary color */
   --color-text-primary: #ffffff;
-  --color-text-primary-dimmed: rgb(156 156 186)
+  --color-text-primary-dimmed: rgb(156 156 186);
 }
 body {
   color: var(--color-text-primary);
 }
+div.field input {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-primary) !important;
+}
+
 input::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: var(--color-text-primary);
@@ -81,9 +86,15 @@ input::placeholder {
   animation: fadeInFromBottom 1s ease-out 1s forwards;
 }
 @keyframes change-bg-briefly {
-  0% { background-color: initial; }
-  50% { background-color: #ffffff; }
-  100% { background-color: initial; }
+  0% {
+    background-color: initial;
+  }
+  50% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: initial;
+  }
 }
 
 .bg-briefly-changed {
@@ -98,12 +109,11 @@ input::placeholder {
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
 }
-.form-group{
+.form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
   width: 100%;
-  
 }
 
 legend {
