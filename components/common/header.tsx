@@ -4,6 +4,7 @@ import { Icon, ICON_SIZES } from "@lula-technologies-inc/lux";
 import { useRouter } from 'next/router';
 import useDarkMode from '@/hooks/useDarkMode';
 import { useAuthContext } from "@/hooks/auth";
+import { ToggleSlider } from "react-toggle-slider";
 
 const Header: FC = () => {
   const router = useRouter();
@@ -25,7 +26,6 @@ const Header: FC = () => {
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    // Check if the click was outside the dropdown AND not on the excluded button
     if (
       dropdownRef.current &&
       !dropdownRef.current.contains(event.target as Node) &&
@@ -37,7 +37,7 @@ const Header: FC = () => {
 
   const navLinks = [
     { label: 'Home', href: '/' },
-    { label: 'Trucking', href: '/policy/trucking' },
+    { label: 'Trucking', href: '/trucking' },
   ];
 
   useEffect(() => {
@@ -91,13 +91,23 @@ const Header: FC = () => {
                 Signed in as:
                 <div className="font-semibold text-center text-primary">{user?.email}</div>
               </div>
-              <div>
-                <button
-                  className="w-full px-4 py-2 text-center text-primary-dimmed border-t border-secondary hover:bg-primary-hover"
-                  onClick={() => setDarkMode(!darkMode)}
-                >
-                  Toggle Dark Mode
-                </button>
+              <div className="flex flex-row items-center p-2 justify-center border-t border-primary-dimmed">
+                <Icon
+                  icon="sun"
+                  title="Sun Icon"
+                  className="text-primary-dimmed aria-hidden p-2 fa-solid hover:text-primary transition-all duration-200"
+                  size={ICON_SIZES.XL}
+                />
+                <ToggleSlider
+                  active={darkMode}
+                  onToggle={state => setDarkMode(state)}
+                />
+                <Icon
+                  icon="moon"
+                  title="Moon Icon"
+                  className="text-primary-dimmed aria-hidden p-2 fa-solid hover:text-primary transition-all duration-200"
+                  size={ICON_SIZES.XL}
+                />
               </div>
               <button
                 className="w-full px-4 py-2 text-center text-white bg-red-500 hover:bg-red-600"

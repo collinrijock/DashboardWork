@@ -47,7 +47,7 @@ const PostPolicy = () => {
             console.error("Error submitting policy:", error);
             alert("An error occurred while submitting the policy. Please try again.");
         } finally {
-            setLoading(false); // Set loading to false after the request is complete
+            setLoading(false); 
         }
     };
 
@@ -62,12 +62,11 @@ const PostPolicy = () => {
     };
 
     return (
-        <div className="flex flex-col p-12 animate-fade-in bg-secondary min-h-screen">
+        <div className="flex flex-col mt-8 animate-fade-in bg-secondary min-h-screen">
             <Head>
-                <title>Trucking Policy</title>
+                <title>Trucking Portal v0</title>
             </Head>
-            <h1 className="w-full text-6xl p-2">Trucking Policy Form</h1>
-            <form className='mt-12' onSubmit={submitForm}>
+            <form className='' onSubmit={submitForm}>
                 <label htmlFor="accountEntityId" className="block">
                     Account Entity ID (Ex: 12345)
                 </label>
@@ -115,7 +114,7 @@ const PostPolicy = () => {
                     <button
                         type="submit"
                         className="bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4"
-                        disabled={loading} // Disable the button if loading is true
+                        disabled={loading} 
                     >
                         {loading ? 'Submitting...' : 'Submit'}
                     </button>
@@ -160,5 +159,3 @@ const PostPolicy = () => {
 };
 
 export default PostPolicy;
-
-
