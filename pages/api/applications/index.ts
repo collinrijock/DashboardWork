@@ -15,7 +15,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       queryParams.append("status", "incomplete");
     } 
     const url = `${process.env.LULA_API_URL}/embedded/v1/backoffice/search?${queryParams}`;
-    console.log(`Sending request to ${url}`);
     queryParams.toString().replace(/%2C/g, "&status=")
     const response = await fetch(url, {
       headers: {
