@@ -16,6 +16,7 @@
     "@rjsf/core": "^5.13.0",
     "@rjsf/utils": "^5.13.0",
     "@rjsf/validator-ajv8": "^5.13.0",
+    "@slack/web-api": "^6.9.0",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/line-clamp": "^0.4.2",
     "@types/node": "18.15.3",
