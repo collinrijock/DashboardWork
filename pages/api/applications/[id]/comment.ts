@@ -22,7 +22,7 @@ export default async function handler(
         try {
             await axios({
                 method: "POST",
-                url: `${process.env.LULA_API_URL}/v1/backoffice/application/${id}/comments`,
+                url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/application/${id}/comments`,
                 headers: {
                     "x-source": "dashboard",
                     ...(authorization && {Authorization: authorization}),
