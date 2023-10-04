@@ -1,21 +1,14 @@
 import type {NextApiRequest, NextApiResponse} from "next";
 import axios from "axios";
 import {sendSlackNotification} from "../../slackNotificationService";
+import { Redis } from '@upstash/redis'
 
-
-const getSlackThread = async (id: string, authorization: string) => {
-    const url = `${process.env.LULA_API_URL}/embedded/v1/application/${id}`;
-    try {
-        const response = await axios.get(url, {
-            headers: {
-                ...(authorization && {Authorization: authorization}),
-            },
-        });
-        return response.data.applicationData.slackThread;
-    } catch (error: any) {
-        console.error("Error fetching application:", error?.message);
-        return null;
-    }
+const getSlackThread = async (id: string) : Promise<string | null> => {
+    const redis = new Redis({
+        url: `${process.env.UPSTASH_REDIS_SLACK_URL}`,
+        token: `${process.env.UPSTASH_REDIS_SLACK_TOKEN}`
+    })
+    return await redis.get<string>(id);
 }
 
 export default async function handler(
@@ -29,7 +22,7 @@ export default async function handler(
         try {
             await axios({
                 method: "POST",
-                url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/application/${id}/comments`,
+                url: `${process.env.LULA_API_URL}/v1/backoffice/application/${id}/comments`,
                 headers: {
                     "x-source": "dashboard",
                     ...(authorization && {Authorization: authorization}),
@@ -39,8 +32,9 @@ export default async function handler(
                 },
             });
             try {
-                const slackThread = await getSlackThread(id as string, authorization as string);
-                sendSlackNotification(comment, slackThread, "Dashboard");
+                const slackThread = await getSlackThread(id as string);
+                if(slackThread)
+                    sendSlackNotification(comment, slackThread, "Dashboard");
             } catch (error: any) {
                 console.error("Error fetching slack thread:", error?.message);
             }
