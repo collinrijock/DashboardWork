@@ -48,7 +48,7 @@ const Header: FC = () => {
   }, []);
 
   return (
-    <div className="w-full h-20 bg-primary shadow">
+    <div className="w-full h-20 bg-primary">
       <div className="h-20 mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
         {/* logo */}
         <Link className="grid place-content-center" href="/">
@@ -85,18 +85,14 @@ const Header: FC = () => {
           </button>
           {/* Dropdown */}
           {dropdownVisible && (
-            <div ref={dropdownRef} className="absolute overflow-hidden right-0 mt-6 w-48 bg-primary rounded-lg shadow-xl text-primary text-sm z-10 animate-fade-in-down">
-
-              <div className="px-4 py-2 text-center text-primary-dimmed">
-                Signed in as:
-                <div className="font-semibold text-center text-primary">{user?.email}</div>
-              </div>
-              <div className="flex flex-row items-center p-2 justify-center border-t border-primary-dimmed">
+            <div ref={dropdownRef} className="absolute overflow-hidden right-0 mt-6 w-36 bg-primary rounded-lg shadow-xl text-primary text-sm z-10 animate-fade-in-down">
+              <div className=" text-center text-primary py-2 capitalize tracking-wide">{user?.email}</div>
+              <div className="flex flex-row items-center justify-center py-2 border-t-2 border-opacity-10 border-black">
                 <Icon
                   icon="sun"
                   title="Sun Icon"
                   className="text-primary-dimmed aria-hidden p-2 fa-solid hover:text-primary transition-all duration-200"
-                  size={ICON_SIZES.XL}
+                  size={ICON_SIZES.LG}
                 />
                 <ToggleSlider
                   active={darkMode}
@@ -106,7 +102,7 @@ const Header: FC = () => {
                   icon="moon"
                   title="Moon Icon"
                   className="text-primary-dimmed aria-hidden p-2 fa-solid hover:text-primary transition-all duration-200"
-                  size={ICON_SIZES.XL}
+                  size={ICON_SIZES.LG}
                 />
               </div>
               <button

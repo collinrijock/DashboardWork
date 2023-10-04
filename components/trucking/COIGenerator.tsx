@@ -1,6 +1,6 @@
 // truckingCOI.js
 import React, { useState } from 'react';
-import { customTheme, formSchema } from './formConfig';
+import { formSchema } from './formConfig';
 import validator from '@rjsf/validator-ajv8';
 import Form from '@rjsf/core';
 import { useAuthContext } from '@/hooks/auth';
