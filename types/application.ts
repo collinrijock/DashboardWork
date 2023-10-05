@@ -28,6 +28,7 @@ export interface Application {
     fleetSize: number | null;
     businessName: string | null;
     businessAddress: Address | null;
+    salesforceId: string | null;
   };
   insuranceProgramName: string | null;
   insuranceProgramSchemaVersion: number | null;
@@ -37,7 +38,6 @@ export interface Application {
   status: string | null;
   tenantId: string | null;
   source: string | null;
-  salesforceId: string | null;
 }
 
 export enum ApplicationStatus {
