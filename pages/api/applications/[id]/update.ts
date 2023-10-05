@@ -53,13 +53,13 @@ export default async function handler(
           ...(authorization && { Authorization: authorization }),
         },
       });
+      
       if (response.status < 400) {
         res.status(200).json({ message: "Successfully updated" });
       } else {
         console.log("response", response);
         res.status(400).json({ error: "Failed to update" });
       }
-
     } catch (error: any) {
       console.error(error);
       res
