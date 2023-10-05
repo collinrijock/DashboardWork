@@ -15,6 +15,7 @@ export interface Applicant {
 }
 
 export interface Application {
+  statusHistory: Array<any>;
   applicationDocuments: Array<{
     name: string;
     url: string;
