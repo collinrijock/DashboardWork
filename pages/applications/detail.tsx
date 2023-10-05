@@ -110,9 +110,6 @@ const ApplicationDetail = () => {
   // Update application status when applicationStatus changes
   const handleStatusChange = async (newStatus: string) => {
     setApplicationStatus(newStatus)
-    if (!terminalStatuses.includes(newStatus)) {
-      updateApplicationStatus(newStatus);
-    }
     setEditStatus(false);
   }
 
@@ -457,7 +454,7 @@ const ApplicationDetail = () => {
             <div className="w-1/4 bg-primary p-4 rounded ml-2 shadow-md">
               <div className="flex flex-row justify-between w-full items-center">
                 <h3 className="font-bold">Application Statuses</h3>
-                {!terminalStatuses.includes(applicationStatus) && editPrivilege && <button className="bg-primary text-primary rounded p-2" onClick={() => setEditStatus(!editStatus)}>
+                {editPrivilege && <button className="bg-primary text-primary rounded" onClick={() => setEditStatus(!editStatus)}>
                   <Icon
                     className="fa-regular cursor-pointer opacity-50"
                     icon="pen"
@@ -466,7 +463,7 @@ const ApplicationDetail = () => {
               </div>
               <div className="flex flex-row items-center justify-between my-4 border-primary-dimmed border-b">
                 <p className="text-sm">Overall</p>
-                {editStatus && !terminalStatuses.includes(applicationStatus) ? (
+                {editStatus ? (
                   // In edit mode
                   <>
                     <select
@@ -494,29 +491,26 @@ const ApplicationDetail = () => {
                   </div>
                 )}
               </div>
-              {terminalStatuses.includes(applicationStatus) && !terminalStatuses.includes(String(application.status)) &&
-                <div className="mt-2">
-                  <textarea
-                    value={statusNote as string}
-                    onChange={(e) => setStatusNote(e.target.value)}
-                    placeholder="Status Notes"
-                    className="w-full text-primary bg-primary border border-gray-300 rounded"
-                  />
-                  <button
-                    className="bg-secondary w-full text-primary rounded p-2 mt-4 hover:bg-primary-hover"
-                    onClick={() => { if (statusNote.length > 0) updateApplicationStatus(applicationStatus) }}
-                  >
-                    Submit
-                  </button>
-                  <button
-                    className="bg-red-500 w-full text-white rounded mt-2 p-2"
-                    onClick={() => { setApplicationStatus(String(application.status)); setStatusNote(""); setEditStatus(false) }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              }
-
+              {applicationStatus != application.status && <div className="mt-2">
+                <textarea
+                  value={statusNote as string}
+                  onChange={(e) => setStatusNote(e.target.value)}
+                  placeholder="Status Notes"
+                  className="w-full text-primary bg-primary border border-gray-300 rounded"
+                />
+                <button
+                  className="bg-secondary w-full text-primary rounded p-2 mt-4 hover:bg-primary-hover"
+                  onClick={() => { if (statusNote.length > 0) updateApplicationStatus(applicationStatus) }}
+                >
+                  Submit
+                </button>
+                <button
+                  className="bg-red-500 w-full text-white rounded mt-2 p-2"
+                  onClick={() => { setApplicationStatus(String(application.status)); setStatusNote(""); setEditStatus(false) }}
+                >
+                  Cancel
+                </button>
+              </div>}
             </div>
           </div>
 
@@ -735,14 +729,14 @@ const ApplicationDetail = () => {
             {activeTab === 'changelog' && (
               <div className="flex flex-col justify-around border-t border-primary-dimmed">
                 {application?.statusHistory?.length > 0 ? (
-                  application.statusHistory.map((statusHistory: any, index) => (
+                  application.statusHistory.slice(1).map((statusHistory: any, index) => (
                     <div key={index} className="flex flex-row items-center justify-end p-4 border-b border-primary-dimmed">
                       <div className="flex flex-col mr-auto">
-                        <p className="text-primary">&ldquo;{statusHistory.note}&rdquo;</p>
-                        <p className="text-primary">Application status changes to {statusHistory.status}</p>
+                        {statusHistory.note && <p className="text-primary">&ldquo;{statusHistory.note}&rdquo;</p> }
+                        <p className="text-primary">Application status changed to {statusHistory.status}</p>
                         <p className="text-primary-dimmed">{statusHistory.createdBy}</p>
                       </div>
-                      <p className="text-primary-dimmed">{new Date(statusHistory.createdAt).toLocaleDateString()}</p>
+                      <p className="text-primary-dimmed">{new Date(statusHistory.createdAt).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                   ))
                 ) : (
