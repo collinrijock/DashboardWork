@@ -34,6 +34,29 @@ export default async function handler(
         .status(500)
         .json({ error: "Failed to make API request", message: error.message });
     }
+    try {
+      const response = await axios({
+        method: "PUT",
+        url: `${process.env.LULA_ONBOARDING_API_URL}/account/${id}/sync-back`,
+        data,
+        headers: {
+          "X-Source": "dashboard",
+          ...(authorization && { Authorization: authorization }),
+        },
+      });
+
+      if (response.status < 400) {
+        res.status(200).json({ message: "Successfully synced data" });
+      } else {
+        console.log("response", response);
+        res.status(400).json({ error: "Failed to sync data" });
+      }
+    } catch (error: any) {
+      console.error(error);
+      res
+          .status(500)
+          .json({ error: "Failed to make API request", message: error.message });
+    }
   } else {
     res.status(405).json({ error: "Method not allowed" });
   }
