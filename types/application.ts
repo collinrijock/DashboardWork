@@ -28,6 +28,7 @@ export interface Application {
     fleetSize: number | null;
     businessName: string | null;
     businessAddress: Address | null;
+    salesforceId: string | null;
   };
   insuranceProgramName: string | null;
   insuranceProgramSchemaVersion: number | null;
