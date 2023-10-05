@@ -262,8 +262,8 @@ const ApplicationDetail = () => {
                     <div className="ml-10">
                       <label className="text-xs text-primary-dimmed">Salesforce</label>
                       <p>{(application.applicationData.salesforceId) ?
-                        <a href="https://lula.lightning.force.com/lightning/r/Account/${application.applicationData.salesforceId}/view">
-                          application.applicationData.salesforceId
+                        <a href={`https://lula.lightning.force.com/lightning/r/Account/${application.applicationData.salesforceId}/view`} target="_blank">
+                          {application.applicationData.salesforceId}
                           <Icon
                             className="fa-regular cursor-pointer opacity-50"
                             icon="external-link"
