@@ -66,7 +66,7 @@ export default async function handler(
         .status(500)
         .json({ error: "Failed to make API request", message: error.message });
     }
-    syncBack(id, status, req.headers, res, data)
+    syncBack(id, status, req.headers, res, data.applicationData)
   } else {
     res.status(405).json({ error: "Method not allowed" });
   }
