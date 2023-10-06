@@ -39,7 +39,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PUT") {
-    const {id} = req.query!;
+    const id = req.query;
     const applicationData = req.body
     const authorization = req.headers.authorization;
     const data = { id, applicationData: JSON.stringify(applicationData) };
@@ -67,7 +67,7 @@ export default async function handler(
         .status(500)
         .json({ error: "Failed to make API request", message: error.message });
     }
-    syncBack(String(id), status, req.headers, res, JSON.stringify(data.applicationData))
+    syncBack(String(id), status, req.headers, res, JSON.parse(data.applicationData))
   } else {
     res.status(405).json({ error: "Method not allowed" });
   }
