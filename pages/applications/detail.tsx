@@ -729,16 +729,19 @@ const ApplicationDetail = () => {
             {activeTab === 'changelog' && (
               <div className="flex flex-col justify-around border-t border-primary-dimmed">
                 {application?.statusHistory?.length > 0 ? (
-                  application.statusHistory.slice(1).map((statusHistory: any, index) => (
-                    <div key={index} className="flex flex-row items-center justify-end p-4 border-b border-primary-dimmed">
-                      <div className="flex flex-col mr-auto">
-                        {statusHistory.note && <p className="text-primary">&ldquo;{statusHistory.note}&rdquo;</p> }
-                        <p className="text-primary">Application status changed to {statusHistory.status}</p>
-                        <p className="text-primary-dimmed">{statusHistory.createdBy}</p>
+                  application.statusHistory
+                    .filter((statusHistory: any) => statusHistory.status !== 'DRAFT')
+                    .reverse()
+                    .map((statusHistory: any, index) => (
+                      <div key={index} className="flex flex-row items-center justify-end p-4 border-b border-primary-dimmed">
+                        <div className="flex flex-col mr-auto">
+                          {statusHistory.note && <p className="text-primary">&ldquo;{statusHistory.note}&rdquo;</p>}
+                          <p className="text-primary">Application status changed to {statusHistory.status}</p>
+                          <p className="text-primary-dimmed">{statusHistory.createdBy}</p>
+                        </div>
+                        <p className="text-primary-dimmed">{new Date(statusHistory.createdAt).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
-                      <p className="text-primary-dimmed">{new Date(statusHistory.createdAt).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                    </div>
-                  ))
+                    ))
                 ) : (
                   <div className="flex flex-row items-center justify-start p-4 border-t border-primary-dimmed">
                     <p className="text-primary">No status changes yet</p>
