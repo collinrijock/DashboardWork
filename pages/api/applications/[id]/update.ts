@@ -4,7 +4,6 @@ import {IncomingHttpHeaders} from "http";
 
 const syncBack = async (
     id: string,
-    status: string,
     headers: IncomingHttpHeaders,
     res: NextApiResponse<any>,
     data: any
@@ -39,7 +38,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PUT") {
-    const {id, applicationData } = req.body;
+    const id = req.query.id as string;
+    const {applicationData} = req.body
     const authorization = req.headers.authorization;
     const data = { id, applicationData: JSON.stringify(applicationData) };
     console.log("applicationData", data);
@@ -66,7 +66,7 @@ export default async function handler(
         .status(500)
         .json({ error: "Failed to make API request", message: error.message });
     }
-    syncBack(id, status, req.headers, res, data)
+    syncBack(id, req.headers, res, JSON.parse(data.applicationData))
   } else {
     res.status(405).json({ error: "Method not allowed" });
   }
