@@ -660,7 +660,8 @@ const ApplicationDetail = () => {
                     <p className="text-primary-dimmed text-sm">Status</p>
                     <select
                       onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
-                      className="bg-transparent outline-none border-white rounded">
+                      className="bg-transparent outline-none border-white rounded"
+                      value={vehicle.content.insuranceCriteriaStatus}>
                         <option>Inactive</option>
                         <option>Under Review</option>
                         <option>Active</option>
