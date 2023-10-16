@@ -113,6 +113,19 @@ const ApplicationDetail = () => {
     setEditStatus(false);
   }
 
+  const handleVehicleStatusChange = async (vehicleId : string, status : string) => {
+    const token = await getToken();
+    if (!token) return;
+
+    const response = await fetch(`/api/vehicles/${vehicleId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
+
   useEffect(() => {
     if (isAuthenticated && id) {
       fetchApplication();
@@ -638,9 +651,20 @@ const ApplicationDetail = () => {
               {vehicles.map((vehicle: any, index) => (
                 <div key={index} className="grid grid-rows-1 grid-cols-12 gap-x-8 p-4 border-t border-primary-dimmed">
 
-                  <div className="flex flex-col col-span-3 h-full">
+                  <div className="flex flex-col col-span-2 h-full">
                     <p className="text-primary-dimmed text-sm">Vin</p>
                     <p className="text-primary mt-2">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
+                  </div>
+
+                  <div className="flex flex-col col-span-2 h-full">
+                    <p className="text-primary-dimmed text-sm">Status</p>
+                    <select
+                      onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
+                      className="bg-transparent outline-none border-white rounded">
+                        <option>Inactive</option>
+                        <option>Under Review</option>
+                        <option>Active</option>
+                    </select>
                   </div>
 
                   <div className="flex flex-col">
@@ -653,7 +677,7 @@ const ApplicationDetail = () => {
                     <p className="text-primary mt-2">{vehicle.content.registrationState || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-2">
+                  <div className="flex flex-col col-span-1">
                     <p className="text-primary-dimmed text-sm">License Plate</p>
                     <p className="text-primary mt-2">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
