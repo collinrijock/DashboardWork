@@ -116,14 +116,21 @@ const ApplicationDetail = () => {
   const handleVehicleStatusChange = async (vehicleId : string, status : string) => {
     const token = await getToken();
     if (!token) return;
-
-    const response = await fetch(`/api/vehicles/${vehicleId}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    try {
+      const response = await fetch(`/api/vehicles/${vehicleId}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          accountId: application.id,
+          status,
+        }),
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch(err) {
+      console.error(err);
+      alert('Failed to update status.');
+    }
   }
 
   useEffect(() => {
