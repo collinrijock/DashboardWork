@@ -113,21 +113,21 @@ const ApplicationDetail = () => {
     setEditStatus(false);
   }
 
-  const handleVehicleStatusChange = async (vehicleId : string, status : string) => {
+  const handleVehicleStatusChange = async (vehicleId: string, status: string) => {
     const token = await getToken();
     if (!token) return;
     try {
-      const response = await fetch(`/api/vehicles/${vehicleId}/status`, {
+      await fetch(`/api/vehicles/${vehicleId}/status`, {
         method: 'PUT',
         body: JSON.stringify({
-          accountId: application.id,
+          accountId: application?.id,
           status,
         }),
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-    } catch(err) {
+    } catch (err) {
       console.error(err);
       alert('Failed to update status.');
     }
@@ -668,10 +668,10 @@ const ApplicationDetail = () => {
                     <select
                       onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
                       className="bg-transparent outline-none border-white rounded"
-                      value={vehicle.content.insuranceCriteriaStatus}>
-                        <option>Inactive</option>
-                        <option>Under Review</option>
-                        <option>Active</option>
+                      value={vehicle.status}>
+                      <option value="APPROVED">Approved</option>
+                      <option value="DECLINED">Declined</option>
+                      <option value="UNDERREVIEW">Under Review</option>
                     </select>
                   </div>
 

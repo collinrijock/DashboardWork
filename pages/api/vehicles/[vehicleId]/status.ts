@@ -8,15 +8,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!body.status) return res.status(400);
   if (!body.accountId) return res.status(400);
   try {
+    console.log('sending request to onboarding bff')
     await axios({
       url: `${process.env.LULA_ONBOARDING_API_URL}/api/appFlow/${body.accountId}/${vehicleId}`,
       method: 'POST',
       data: { insuranceCriteriaStatus: body.status },
       headers: { 'Authorzation': req.headers.authorization },
-    });
-  } catch(err) {
-    console.error(err);
-    return res.statu(500).send('Onboarding App Failed');
+    })
+    console.log('request sent to onboarding bff')
+    console.log('sending request to embedded api')
+    await axios({
+      url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/asset-status-update`,
+      method: 'POST',
+      data: { assetId: vehicleId, status: body.status, applicationId: body.accountId },
+      headers: { 'Authorzation': req.headers.authorization },
+    })
+    console.log('request sent to embedded api')
+  } catch(err : any) {
+    console.error(err.message);
+    return res.status(500).send(err.message);
   }
   return res.status(200);
 };
