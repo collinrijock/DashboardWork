@@ -127,6 +127,7 @@ const ApplicationDetail = () => {
           'Authorization': `Bearer ${token}`
         }
       });
+      fetchApplication();
     } catch (err) {
       console.error(err);
       alert('Failed to update status.');
@@ -664,10 +665,10 @@ const ApplicationDetail = () => {
                   </div>
 
                   <div className="flex flex-col col-span-2 h-full">
-                    <p className="text-primary-dimmed text-sm">Status</p>
+                    <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
                     <select
                       onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
-                      className="bg-transparent outline-none border-white rounded"
+                      className="bg-transparent outline-none border-primary rounded "
                       value={vehicle.status}>
                       <option value="APPROVED">Approved</option>
                       <option value="DECLINED">Declined</option>
