@@ -113,6 +113,27 @@ const ApplicationDetail = () => {
     setEditStatus(false);
   }
 
+  const handleVehicleStatusChange = async (vehicleId: string, status: string) => {
+    const token = await getToken();
+    if (!token) return;
+    try {
+      await fetch(`/api/vehicles/${vehicleId}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          accountId: application?.id,
+          status,
+        }),
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      fetchApplication();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update status.');
+    }
+  }
+
   useEffect(() => {
     if (isAuthenticated && id) {
       fetchApplication();
@@ -638,10 +659,29 @@ const ApplicationDetail = () => {
               {vehicles.map((vehicle: any, index) => (
                 <div key={index} className="grid grid-rows-1 grid-cols-12 gap-x-8 p-4 border-t border-primary-dimmed">
 
-                  <div className="flex flex-col col-span-3 h-full">
+                  <div className="flex flex-col col-span-2 h-full">
                     <p className="text-primary-dimmed text-sm">Vin</p>
                     <p className="text-primary mt-2">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
+
+                  {editPrivilege &&
+                    <div className="flex flex-col col-span-2 h-full">
+                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
+                      <select
+                        onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
+                        className="bg-transparent outline-none border-primary rounded "
+                        value={vehicle.status}>
+                        <option value="APPROVED">Approved</option>
+                        <option value="DECLINED">Declined</option>
+                        <option value="UNDERREVIEW">Under Review</option>
+                      </select>
+                    </div>}
+                  {
+                    !editPrivilege && <div className="flex flex-col col-span-2 h-full">
+                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
+                      <p className="">{vehicle.status}</p>
+                    </div>
+                  }
 
                   <div className="flex flex-col">
                     <p className="text-primary-dimmed text-sm">Mileage</p>
@@ -653,7 +693,7 @@ const ApplicationDetail = () => {
                     <p className="text-primary mt-2">{vehicle.content.registrationState || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-2">
+                  <div className="flex flex-col col-span-1">
                     <p className="text-primary-dimmed text-sm">License Plate</p>
                     <p className="text-primary mt-2">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
