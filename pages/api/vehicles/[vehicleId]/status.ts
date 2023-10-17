@@ -10,24 +10,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     console.log('sending request to onboarding bff')
     await axios({
-      url: `${process.env.LULA_ONBOARDING_API_URL}/api/appFlow/${body.accountId}/${vehicleId}`,
+      url: `${process.env.LULA_ONBOARDING_API_URL}/appFlow/${body.accountId}/${vehicleId}`,
       method: 'POST',
       data: { insuranceCriteriaStatus: body.status },
       headers: { 'Authorzation': req.headers.authorization },
     })
     console.log('request sent to onboarding bff')
     console.log('sending request to embedded api')
+    console.log(req.headers.authorization)
+    const authorization = req.headers.authorization;
     await axios({
       url: `${process.env.LULA_API_URL}/embedded/v1/backoffice/asset-status-update`,
       method: 'POST',
       data: { assetId: vehicleId, status: body.status, applicationId: body.accountId },
-      headers: { 'Authorzation': req.headers.authorization },
+      headers: {
+        ...(authorization && { Authorization: authorization }),
+      },
     })
     console.log('request sent to embedded api')
+    return res.status(200).send("updated");
   } catch(err : any) {
-    console.error(err.message);
+    console.error(err);
     return res.status(500).send(err.message);
   }
+  
   return res.status(200);
 };
 
