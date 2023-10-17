@@ -664,17 +664,24 @@ const ApplicationDetail = () => {
                     <p className="text-primary mt-2">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-2 h-full">
-                    <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
-                    <select
-                      onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
-                      className="bg-transparent outline-none border-primary rounded "
-                      value={vehicle.status}>
-                      <option value="APPROVED">Approved</option>
-                      <option value="DECLINED">Declined</option>
-                      <option value="UNDERREVIEW">Under Review</option>
-                    </select>
-                  </div>
+                  {editPrivilege &&
+                    <div className="flex flex-col col-span-2 h-full">
+                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
+                      <select
+                        onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
+                        className="bg-transparent outline-none border-primary rounded "
+                        value={vehicle.status}>
+                        <option value="APPROVED">Approved</option>
+                        <option value="DECLINED">Declined</option>
+                        <option value="UNDERREVIEW">Under Review</option>
+                      </select>
+                    </div>}
+                  {
+                    !editPrivilege && <div className="flex flex-col col-span-2 h-full">
+                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
+                      <p className="">{vehicle.status}</p>
+                    </div>
+                  }
 
                   <div className="flex flex-col">
                     <p className="text-primary-dimmed text-sm">Mileage</p>
