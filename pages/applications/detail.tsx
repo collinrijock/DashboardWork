@@ -251,7 +251,15 @@ const ApplicationDetail = () => {
       console.error("Failed to update the field:", error.message);
     }
   }
+  function generateAddressString(...fields: any[]) {
+    const nonEmptyFields = fields.filter((field) => field);
 
+    if (nonEmptyFields.length > 0) {
+      return nonEmptyFields.join(', ');
+    }
+
+    return null;
+  }
   const renderApplicationDetails = () => {
     if (loading || !id || !application?.applicationData) {
       return <div></div>;
@@ -388,15 +396,6 @@ const ApplicationDetail = () => {
                           className="bg-primary"
                           value={application.applicationData?.applicant?.lastName}
                           onChange={(e) => updateField(['applicant', 'lastName'], e.target.value)}
-                        />
-                      </div>
-                      <div className="flex flex-col mr-4">
-                        <label className="text-xs text-primary-dimmed">Email</label>
-                        <input
-                          type="email"
-                          className="bg-primary"
-                          value={application.applicationData?.applicant?.email}
-                          onChange={(e) => updateField(['applicant', 'email'], e.target.value)}
                         />
                       </div>
                       <div className="flex flex-col mr-4">
@@ -657,7 +656,7 @@ const ApplicationDetail = () => {
             </div>
             {!isVehiclesToggled && <div className="flex flex-col">
               {vehicles.map((vehicle: any, index) => (
-                <div key={index} className="grid grid-rows-1 grid-cols-12 gap-x-8 p-4 border-t border-primary-dimmed">
+                <div key={index} className="grid grid-rows-2 grid-cols-12 gap-x-8 p-4 border-t border-primary-dimmed">
 
                   <div className="flex flex-col col-span-2 h-full">
                     <p className="text-primary-dimmed text-sm">Vin</p>
@@ -678,23 +677,23 @@ const ApplicationDetail = () => {
                     </div>}
                   {
                     !editPrivilege && <div className="flex flex-col col-span-2 h-full">
-                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
-                      <p className="">{vehicle.status}</p>
+                      <p className="text-primary-dimmed text-xs mb-2">Insurance Criteria Status</p>
+                      <p className="">{vehicle.status || <span className="text-yellow-500">Missing</span>}</p>
                     </div>
                   }
 
                   <div className="flex flex-col">
-                    <p className="text-primary-dimmed text-sm">Mileage</p>
-                    <p className="text-primary mt-2">{vehicle.content.mileage || <span className="text-yellow-500">Missing</span>}</p>
+                    <p className="text-primary-dimmed text-xs">Mileage</p>
+                    <p className="text-primary mt-2">{!isNaN(vehicle.content.mileage) ? vehicle.content.mileage : <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-2">
-                    <p className="text-primary-dimmed text-sm">Registration State</p>
+                  <div className="flex flex-col col-span-1">
+                    <p className="text-primary-dimmed text-xs">Registration State</p>
                     <p className="text-primary mt-2">{vehicle.content.registrationState || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
                   <div className="flex flex-col col-span-1">
-                    <p className="text-primary-dimmed text-sm">License Plate</p>
+                    <p className="text-primary-dimmed text-xs">License Plate</p>
                     <p className="text-primary mt-2">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
@@ -703,14 +702,53 @@ const ApplicationDetail = () => {
                     <p className="text-primary mt-2">{vehicle.content.nickName || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-3 items-center justify-center">
-                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank" className="underline flex flex-row items-center justify-center font-medium">
+                  <div className="flex flex-col col-span-4 items-center justify-center">
+                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank" className="ml-auto underline flex flex-row items-center justify-center font-medium">
                       <p className="mr-2" >Underwriting Report</p>
                       <Icon
                         className="fa-regular cursor-pointer opacity-50"
                         icon="external-link"
                       />
                     </a>
+                  </div>
+
+                  <div className="flex flex-col col-span-6">
+                    <p className="text-primary-dimmed text-xs">Registrant Address</p>
+                    <p className="text-primary mt-2">
+                      {generateAddressString(
+                        vehicle.content.registrationAddressLineOne,
+                        vehicle.content.registrationAddressLineTwo,
+                        vehicle.content.registrationCity,
+                        vehicle.content.registrationState,
+                        vehicle.content.registrationZipcode
+                      ) || <span className="text-yellow-500">Missing</span>}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col col-span-6">
+                    <p className="text-primary-dimmed text-xs">Lot Address</p>
+                    <p className="text-primary mt-2">
+                      {generateAddressString(
+                        vehicle.content.lotAddressLineOne,
+                        vehicle.content.lotAddressLineTwo,
+                        vehicle.content.lotCity,
+                        vehicle.content.lotState,
+                        vehicle.content.lotZipcode
+                      ) || <span className="text-yellow-500">Missing</span>}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col col-span-6">
+                    <p className="text-primary-dimmed text-xs">Finance Company Address</p>
+                    <p className="text-primary mt-2">
+                      {generateAddressString(
+                        vehicle.content.financeCompanyAddressLineOne,
+                        vehicle.content.financeCompanyAddressLineTwo,
+                        vehicle.content.financeCompanyCity,
+                        vehicle.content.financeCompanyState,
+                        vehicle.content.financeCompanyZipcode
+                      ) || <span className="text-yellow-500">Missing</span>}
+                    </p>
                   </div>
 
                 </div>
