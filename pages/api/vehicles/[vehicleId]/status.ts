@@ -8,10 +8,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!body.status) return res.status(400);
   if (!body.accountId) return res.status(400);
   try {
+    const paddocksStatus = (status: string) => {
+      if(status === 'APPROVED') return 'Approved';
+      if(status === 'DECLINED') return 'Declined';
+      return 'Under Review';
+    }
+    
     await axios({
       url: `${process.env.LULA_ONBOARDING_API_URL}/appFlow/${body.accountId}/${vehicleId}`,
       method: 'POST',
-      data: { insuranceCriteriaStatus: body.status },
+      data: { insuranceCriteriaStatus: paddocksStatus(body.status) },
       headers: { 'Authorzation': req.headers.authorization },
     })
     const authorization = req.headers.authorization;
