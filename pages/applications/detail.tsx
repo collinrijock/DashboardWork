@@ -251,6 +251,28 @@ const ApplicationDetail = () => {
       console.error("Failed to update the field:", error.message);
     }
   }
+  function generateAddressString(...fields: any[]) {
+    const nonEmptyFields = fields.filter((field) => field);
+
+    if (nonEmptyFields.length > 0) {
+      return nonEmptyFields.join(', ');
+    }
+
+    return null;
+  }
+
+  function computeInsuranceStatus(status: string, insuranceCriteriaStatus: string) {
+    if (status) {
+      return status;
+    } else if (insuranceCriteriaStatus === "Approved" || insuranceCriteriaStatus === "Declined") {
+      return insuranceCriteriaStatus;
+    } else if (insuranceCriteriaStatus === "Under Review") {
+      return "UNDERREVIEW";
+    } else {
+      return <span className="text-yellow-500">Missing</span>;
+    }
+  }
+
 
   const renderApplicationDetails = () => {
     if (loading || !id || !application?.applicationData) {
@@ -388,15 +410,6 @@ const ApplicationDetail = () => {
                           className="bg-primary"
                           value={application.applicationData?.applicant?.lastName}
                           onChange={(e) => updateField(['applicant', 'lastName'], e.target.value)}
-                        />
-                      </div>
-                      <div className="flex flex-col mr-4">
-                        <label className="text-xs text-primary-dimmed">Email</label>
-                        <input
-                          type="email"
-                          className="bg-primary"
-                          value={application.applicationData?.applicant?.email}
-                          onChange={(e) => updateField(['applicant', 'email'], e.target.value)}
                         />
                       </div>
                       <div className="flex flex-col mr-4">
@@ -657,54 +670,58 @@ const ApplicationDetail = () => {
             </div>
             {!isVehiclesToggled && <div className="flex flex-col">
               {vehicles.map((vehicle: any, index) => (
-                <div key={index} className="grid grid-rows-1 grid-cols-12 gap-x-8 p-4 border-t border-primary-dimmed">
+                <div key={index} className="flex flex-row items-stretch flex-wrap gap-x-8 gap-y-6 p-4 border-t border-primary-dimmed">
 
                   <div className="flex flex-col col-span-2 h-full">
-                    <p className="text-primary-dimmed text-sm">Vin</p>
-                    <p className="text-primary mt-2">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
+                    <p className="text-primary-dimmed text-sm mb-4">Vin</p>
+                    <p className="text-primary">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  {editPrivilege &&
-                    <div className="flex flex-col col-span-2 h-full">
-                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
+                  {/* status */}
+                  <div className="flex flex-col col-span-2 h-full">
+                    <p className="text-primary-dimmed text-sm mb-4">Insurance Criteria Status</p>
+                    {editPrivilege ? (
                       <select
-                        onChange={evt => handleVehicleStatusChange(vehicle.id, evt.target.value)}
-                        className="bg-transparent outline-none border-primary rounded "
-                        value={vehicle.status}>
+                        onChange={(evt) => handleVehicleStatusChange(vehicle.id, evt.target.value)}
+                        className="bg-transparent outline-none border-primary rounded p-1 px-4"
+                        value={computeInsuranceStatus(vehicle.status, vehicle.content.insuranceCriteriaStatus) as string}
+                      >
                         <option value="APPROVED">Approved</option>
                         <option value="DECLINED">Declined</option>
                         <option value="UNDERREVIEW">Under Review</option>
                       </select>
-                    </div>}
-                  {
-                    !editPrivilege && <div className="flex flex-col col-span-2 h-full">
-                      <p className="text-primary-dimmed text-sm mb-2">Insurance Criteria Status</p>
-                      <p className="">{vehicle.status}</p>
-                    </div>
-                  }
+                    ) : (
+                      <div className="flex flex-col col-span-2 h-full">
+                        <p className="text-primary-dimmed text-xs mb-4">Insurance Criteria Status</p>
+                        <p className="">
+                          {computeInsuranceStatus(vehicle.status, vehicle.content.insuranceCriteriaStatus)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex flex-col">
-                    <p className="text-primary-dimmed text-sm">Mileage</p>
-                    <p className="text-primary mt-2">{vehicle.content.mileage || <span className="text-yellow-500">Missing</span>}</p>
+                    <p className="text-primary-dimmed text-xs mb-4">Mileage</p>
+                    <p className="text-primary ">{!isNaN(vehicle.content.mileage) ? vehicle.content.mileage : <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-2">
-                    <p className="text-primary-dimmed text-sm">Registration State</p>
-                    <p className="text-primary mt-2">{vehicle.content.registrationState || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col  ">
+                    <p className="text-primary-dimmed text-xs mb-4">Registration State</p>
+                    <p className="text-primary ">{vehicle.content.registrationState || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-1">
-                    <p className="text-primary-dimmed text-sm">License Plate</p>
-                    <p className="text-primary mt-2">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col ">
+                    <p className="text-primary-dimmed text-xs mb-4">License Plate</p>
+                    <p className="text-primary ">{vehicle.content.licensePlate || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-1">
-                    <p className="text-primary-dimmed text-sm">Nickname</p>
-                    <p className="text-primary mt-2">{vehicle.content.nickName || <span className="text-yellow-500">Missing</span>}</p>
+                  <div className="flex flex-col ">
+                    <p className="text-primary-dimmed text-xs mb-4">Nickname</p>
+                    <p className="text-primary ">{vehicle.content.nickName || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col col-span-3 items-center justify-center">
-                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank" className="underline flex flex-row items-center justify-center font-medium">
+                  <div className="flex flex-col ml-auto">
+                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank" className="ml-auto underline flex flex-row items-center justify-center font-medium">
                       <p className="mr-2" >Underwriting Report</p>
                       <Icon
                         className="fa-regular cursor-pointer opacity-50"
@@ -713,6 +730,47 @@ const ApplicationDetail = () => {
                     </a>
                   </div>
 
+                  {/* Registration Address */}
+                  <div className="flex flex-row w-full items-center gap-x-8" >
+                    <div className="flex flex-col">
+                      <p className="text-primary-dimmed text-xs mb-4">Registrant Address</p>
+                      <p className="text-primary">
+                        {generateAddressString(
+                          vehicle.content.registrationAddressLineOne,
+                          vehicle.content.registrationAddressLineTwo,
+                          vehicle.content.registrationCity,
+                          vehicle.content.registrationState,
+                          vehicle.content.registrationZipcode
+                        ) || <span className="text-yellow-500">Missing</span>}
+                      </p>
+                    </div>
+                    {/* lot address */}
+                    <div className="flex flex-col">
+                      <p className="text-primary-dimmed text-xs mb-4">Lot Address</p>
+                      <p className="text-primary">
+                        {generateAddressString(
+                          vehicle.content.lotAddressLineOne,
+                          vehicle.content.lotAddressLineTwo,
+                          vehicle.content.lotCity,
+                          vehicle.content.lotState,
+                          vehicle.content.lotZipcode
+                        ) || <span className="text-yellow-500">Missing</span>}
+                      </p>
+                    </div>
+                    {/* finance company address */}
+                    <div className="flex flex-col">
+                      <p className="text-primary-dimmed text-xs mb-4">Finance Company Address</p>
+                      <p className="text-primary">
+                        {generateAddressString(
+                          vehicle.content.financeCompanyAddressLineOne,
+                          vehicle.content.financeCompanyAddressLineTwo,
+                          vehicle.content.financeCompanyCity,
+                          vehicle.content.financeCompanyState,
+                          vehicle.content.financeCompanyZipcode
+                        ) || <span className="text-yellow-500">Missing</span>}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
               {vehicles.length === 0 && <div className="flex flex-row items-center justify-between p-4 border-t border-primary-dimmed">
