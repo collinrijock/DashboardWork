@@ -30,6 +30,7 @@ const ApplicationDetail = () => {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [editPrivilege, setEditPrivilege] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'comments' | 'changelog'>('comments');
+  const [showVehicleAdditionalDetails, setShowVehicleAdditionalDetails] = useState(Array(vehicles.length).fill(false));
 
 
   const terminalStatuses = ["APPROVED", "REJECTED", "CANCELLED"];
@@ -261,13 +262,13 @@ const ApplicationDetail = () => {
     return null;
   }
 
-  function computeInsuranceStatus(status: string, insuranceCriteriaStatus: string) {
+  function computeInsuranceStatus(status: string, insuranceCriteriaStatus: string, isText?: boolean) {
     if (status) {
-      return status;
+      return isText && status == "UNDERREVIEW" ? "Under Review" : status;
     } else if (insuranceCriteriaStatus === "Approved" || insuranceCriteriaStatus === "Declined") {
       return insuranceCriteriaStatus;
     } else if (insuranceCriteriaStatus === "Under Review") {
-      return "UNDERREVIEW";
+      return isText ? "Under Review" : "UNDERREVIEW";
     } else {
       return <span className="text-yellow-500">Missing</span>;
     }
@@ -657,9 +658,9 @@ const ApplicationDetail = () => {
           </div>
 
           {/* Vehicles */}
-          <div className="bg-primary mt-8 rounded shadow-md w-full">
-            <div className="flex flex-row items-center justify-between p-4 ">
-              <h3 className="text-md font-bold">Vehicles</h3>
+          <div className="mt-8 rounded w-full bg-secondary">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-xl font-bold font-serif">Vehicles</h3>
               <p onClick={toggleVehiclesSection} className="select-none  text-sm cursor-pointer ml-auto mr-2 opacity-60">{!isVehiclesToggled ? 'Hide' : 'Show'} Vehicles</p>
               <button onClick={toggleVehiclesSection} className={`transition-transform duration-300 ${isVehiclesToggled ? 'rotate-90' : 'rotate-0'}`}>
                 <Icon
@@ -668,18 +669,37 @@ const ApplicationDetail = () => {
                 />
               </button>
             </div>
-            {!isVehiclesToggled && <div className="flex flex-col">
+            {!isVehiclesToggled && <div className="flex flex-col gap-y-8">
               {vehicles.map((vehicle: any, index) => (
-                <div key={index} className="flex flex-row items-stretch flex-wrap gap-x-8 gap-y-6 p-4 border-t border-primary-dimmed">
-
+                <div key={index} className="flex flex-row items-stretch flex-wrap gap-x-20 gap-y-12 p-8 border-primary-dimmed bg-primary rounded-md shadow-sm border">
+                  <button
+                    onClick={() => {
+                      const updatedShowDetails = [...showVehicleAdditionalDetails];
+                      updatedShowDetails[index] = !showVehicleAdditionalDetails[index];
+                      setShowVehicleAdditionalDetails(updatedShowDetails);
+                    }}
+                    className="text-primary underline cursor-pointer"
+                  >
+                    {showVehicleAdditionalDetails[index] ? 'Hide Vehicle Additional Details' : 'Show Vehicle Additional Details'}
+                  </button>
                   <div className="flex flex-col col-span-2 h-full">
-                    <p className="text-primary-dimmed text-sm mb-4">Vin</p>
-                    <p className="text-primary">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
+
+                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank" className="ml-auto flex flex-col">
+                      <p className="text-primary-dimmed text-xs mb-4">Vin</p>
+                      <div className="flex flex-row items-center">
+                        <p className="text-primary underline font-medium mr-2">{vehicle.content.vin || <span className="text-yellow-500">Missing</span>}</p>
+                        <Icon
+                          className="fa-regular cursor-pointer opacity-50"
+                          icon="external-link"
+                        />
+                      </div>
+                    </a>
+                    <p className="">{vehicle.content?.year} {vehicle.content?.make} {vehicle.content?.model}</p>
                   </div>
 
                   {/* status */}
                   <div className="flex flex-col col-span-2 h-full">
-                    <p className="text-primary-dimmed text-sm mb-4">Insurance Criteria Status</p>
+                    <p className="text-primary-dimmed text-xs mb-4">Insurance Criteria Status</p>
                     {editPrivilege ? (
                       <select
                         onChange={(evt) => handleVehicleStatusChange(vehicle.id, evt.target.value)}
@@ -692,9 +712,8 @@ const ApplicationDetail = () => {
                       </select>
                     ) : (
                       <div className="flex flex-col col-span-2 h-full">
-                        <p className="text-primary-dimmed text-xs mb-4">Insurance Criteria Status</p>
-                        <p className="">
-                          {computeInsuranceStatus(vehicle.status, vehicle.content.insuranceCriteriaStatus)}
+                        <p className="capitalize-first">
+                          {computeInsuranceStatus(vehicle.status, vehicle.content.insuranceCriteriaStatus, true)}
                         </p>
                       </div>
                     )}
@@ -720,57 +739,48 @@ const ApplicationDetail = () => {
                     <p className="text-primary ">{vehicle.content.nickName || <span className="text-yellow-500">Missing</span>}</p>
                   </div>
 
-                  <div className="flex flex-col ml-auto">
-                    <a href={`/vehicles/detail?vin=${vehicle.content.vin}`} target="_blank" className="ml-auto underline flex flex-row items-center justify-center font-medium">
-                      <p className="mr-2" >Underwriting Report</p>
-                      <Icon
-                        className="fa-regular cursor-pointer opacity-50"
-                        icon="external-link"
-                      />
-                    </a>
-                  </div>
-
                   {/* Registration Address */}
-                  <div className="flex flex-row w-full items-center gap-x-8" >
-                    <div className="flex flex-col">
-                      <p className="text-primary-dimmed text-xs mb-4">Registrant Address</p>
-                      <p className="text-primary">
-                        {generateAddressString(
-                          vehicle.content.registrationAddressLineOne,
-                          vehicle.content.registrationAddressLineTwo,
-                          vehicle.content.registrationCity,
-                          vehicle.content.registrationState,
-                          vehicle.content.registrationZipcode
-                        ) || <span className="text-yellow-500">Missing</span>}
-                      </p>
-                    </div>
-                    {/* lot address */}
-                    <div className="flex flex-col">
-                      <p className="text-primary-dimmed text-xs mb-4">Lot Address</p>
-                      <p className="text-primary">
-                        {generateAddressString(
-                          vehicle.content.lotAddressLineOne,
-                          vehicle.content.lotAddressLineTwo,
-                          vehicle.content.lotCity,
-                          vehicle.content.lotState,
-                          vehicle.content.lotZipcode
-                        ) || <span className="text-yellow-500">Missing</span>}
-                      </p>
-                    </div>
-                    {/* finance company address */}
-                    <div className="flex flex-col">
-                      <p className="text-primary-dimmed text-xs mb-4">Finance Company Address</p>
-                      <p className="text-primary">
-                        {generateAddressString(
-                          vehicle.content.financeCompanyAddressLineOne,
-                          vehicle.content.financeCompanyAddressLineTwo,
-                          vehicle.content.financeCompanyCity,
-                          vehicle.content.financeCompanyState,
-                          vehicle.content.financeCompanyZipcode
-                        ) || <span className="text-yellow-500">Missing</span>}
-                      </p>
-                    </div>
-                  </div>
+                  {showVehicleAdditionalDetails[index] &&
+                    <div className="flex flex-row w-full items-center gap-x-20" >
+                      <div className="flex flex-col">
+                        <p className="text-primary-dimmed text-xs mb-4">Registrant Address</p>
+                        <p className="text-primary">
+                          {generateAddressString(
+                            vehicle.content.registrationAddressLineOne,
+                            vehicle.content.registrationAddressLineTwo,
+                            vehicle.content.registrationCity,
+                            vehicle.content.registrationState,
+                            vehicle.content.registrationZipcode
+                          ) || <span className="text-yellow-500">Missing</span>}
+                        </p>
+                      </div>
+                      {/* lot address */}
+                      <div className="flex flex-col">
+                        <p className="text-primary-dimmed text-xs mb-4">Lot Address</p>
+                        <p className="text-primary">
+                          {generateAddressString(
+                            vehicle.content.lotAddressLineOne,
+                            vehicle.content.lotAddressLineTwo,
+                            vehicle.content.lotCity,
+                            vehicle.content.lotState,
+                            vehicle.content.lotZipcode
+                          ) || <span className="text-yellow-500">Missing</span>}
+                        </p>
+                      </div>
+                      {/* finance company address */}
+                      <div className="flex flex-col">
+                        <p className="text-primary-dimmed text-xs mb-4">Finance Company Address</p>
+                        <p className="text-primary">
+                          {generateAddressString(
+                            vehicle.content.financeCompanyAddressLineOne,
+                            vehicle.content.financeCompanyAddressLineTwo,
+                            vehicle.content.financeCompanyCity,
+                            vehicle.content.financeCompanyState,
+                            vehicle.content.financeCompanyZipcode
+                          ) || <span className="text-yellow-500">Missing</span>}
+                        </p>
+                      </div>
+                    </div>}
                 </div>
               ))}
               {vehicles.length === 0 && <div className="flex flex-row items-center justify-between p-4 border-t border-primary-dimmed">

@@ -59,7 +59,7 @@ module.exports = {
         // text_primary: "rgba(51, 51, 85, 1)",
         // text_secondary: "rgba(51, 51, 85, 0.5)",
         // text_disabled: "rgba(198, 198, 208, 1)",
-         button_primary: "rgba(255, 86, 1, 1)",
+        button_primary: "rgba(255, 86, 1, 1)",
         // button_secondary: "rgba(153, 153, 170, 1)",
         // lulaBorder: "#D1D5DB",
         // lulaBorder_secondary: "#455773",
@@ -89,6 +89,18 @@ module.exports = {
   },
   plugins: [
     require("@tailwindcss/forms"),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.capitalize-first': {
+          textTransform: 'lowercase',
+        },
+        '.capitalize-first::first-letter': {
+          textTransform: 'uppercase',
+        },
+      };
+
+      addUtilities(newUtilities, ['responsive', 'hover']);
+    },
   ],
 }
 
