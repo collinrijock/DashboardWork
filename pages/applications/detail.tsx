@@ -271,12 +271,13 @@ const ApplicationDetail = () => {
     } else if (insuranceCriteriaStatus === "Under Review") {
       return isText ? "Under Review" : "UNDERREVIEW";
     } else {
-      return <span className="text-yellow-500">Missing</span>;
+      return '';
+      //return <span className="text-yellow-500">Missing</span>;
     }
   }
 
   function getInsuranceStatusBg(status: string, insuranceCriteriaStatus: string) {
-    let computedStatus = computeInsuranceStatus(status, insuranceCriteriaStatus, true) as string;
+    let computedStatus = computeInsuranceStatus(status, insuranceCriteriaStatus, true);
     computedStatus = computedStatus.toLowerCase();
     switch (computedStatus) {
       case 'approved':
