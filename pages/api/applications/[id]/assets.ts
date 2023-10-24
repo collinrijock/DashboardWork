@@ -23,7 +23,12 @@ export default async function handler(
         },
       });
       if (response.status === 200) {
-        assets = response.data;
+        assets = response.data.sort((a: any, b: any) => {
+          if (a.content.vin < b.content.vin) {
+            return -1;
+          }
+          return 1;
+        });
       }
       res.status(200).json(assets);
     } catch (error: any) {
