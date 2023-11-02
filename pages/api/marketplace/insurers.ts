@@ -2,15 +2,19 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 
-        const atoken = await axios.post("https://lula-staging.us.auth0.com/oauth/token", {
-            "grant_type":"client_credentials",
-            "client_id": "BkuELIXjPASqG8aGIHQR7kUZVViuZKiB",
-            "client_secret": "KYxJgAeHF3_n8_eUjjobePo5m4WNOA_KiG8z7yxgXijjod9aO9Rcd9tTg6VGM_-C",
-            "audience": "https://staging.marketplace.lula.com/"
+        const lulaApi = process.env.LULA_API_URL;
+        const authUrl = process.env.MARKETPLACE_AUTH0_TOKEN_URL;
+
+        const atoken = await axios.post(`${authUrl}`,{
+            "grant_type": "client_credentials",
+            "client_id": process.env.MARKETPLACE_AUTH0_CLIENT_ID,
+            "client_secret": process.env.MARKETPLACE_AUTH0_CLIENT_SECRET,
+            "audience": process.env.MARKETPLACE_AUTH0_AUDIENCE
         });
+    
         const accessToken = atoken.data.access_token;
         
-        const insurers = await axios.get("https://api.staging-lula.is/marketplace/api/insurers", {      
+        const insurers = await axios.get(`${lulaApi}/marketplace/api/insurers`, {      
             headers: {
                 "Authorization": `Bearer ${accessToken}`
             }
