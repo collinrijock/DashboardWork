@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import { useAuthContext } from "@/hooks/auth";
 import axios from "axios";
 
@@ -56,8 +56,8 @@ type Account = {
 }
 export default function AddAccount() {
     // get values from http GET and display in dropdown
-    const [values, setValues] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [submissionResponse, setSubmissionResponse] = useState<string>();
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const { isAuthenticated, getToken, user } = useAuthContext();
     const [insurers, setInsurers] = useState<any[]>([]);
@@ -171,11 +171,21 @@ export default function AddAccount() {
         });
     };
          
-
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         // Do something with the form data
-        console.log(formData);
+        const token = await getToken();
+        const resp = await fetch("/api/marketplace/saveCoverage", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(formData)
+        });
+
+        setSubmissionResponse(resp.statusText);
+        setIsDialogOpen(true);
     };
     const getInsurers = async () => {
         const token = await getToken();
@@ -195,6 +205,7 @@ export default function AddAccount() {
 
 
         return(
+            <div>
     <form onSubmit={handleSubmit}>
     <div>
     <div>
@@ -253,14 +264,14 @@ export default function AddAccount() {
             placeholder="Policy Number"
         />
         <input
-            type="text"
+            type="date"
             name="autoLiability.startDate"
             value={formData.autoLiability.startDate}
             onChange={handleChange}
             placeholder="Effective Date"
         />
         <input
-            type="text"
+            type="date"
             name="autoLiability.endDate"
             value={formData.autoLiability.endDate}
             onChange={handleChange}
@@ -290,14 +301,14 @@ export default function AddAccount() {
             placeholder="Policy Number"
         />
         <input
-            type="text"
+            type="date"
             name="cargo.startDate"
             value={formData.cargo.startDate}
             onChange={handleChange}
             placeholder="Effective Date"
         />
         <input
-            type="text"
+            type="date"
             name="cargo.endDate"
             value={formData.cargo.endDate}
             onChange={handleChange}
@@ -348,14 +359,14 @@ export default function AddAccount() {
             placeholder="Policy Number"
         />
         <input
-            type="text"
+            type="date"
             name="physicalDamage.startDate"
             value={formData.physicalDamage.startDate}
             onChange={handleChange}
             placeholder="Effective Date"
         />
         <input
-            type="text"
+            type="date"
             name="physicalDamage.endDate"
             value={formData.physicalDamage.endDate}
             onChange={handleChange}
@@ -385,14 +396,14 @@ export default function AddAccount() {
             placeholder="Policy Number"
         />
         <input
-            type="text"
+            type="date"
             name="generalLiability.startDate"
             value={formData.generalLiability.startDate}
             onChange={handleChange}
             placeholder="Effective Date"
         />
         <input
-            type="text"
+            type="date"
             name="generalLiability.endDate"
             value={formData.generalLiability.endDate}
             onChange={handleChange}
@@ -471,5 +482,10 @@ export default function AddAccount() {
         <div>
             <button type="submit">Submit</button>
         </div>
-    </form>);
+    </form>
+    <div className='flex flex-col items-start p-4 relative' open={isDialogOpen} onClick={() => setIsDialogOpen(false)}>
+                {submissionResponse && <p>API Response: {submissionResponse}</p>}
+        </div>
+    </div>
+    );
 }
