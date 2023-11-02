@@ -53,6 +53,7 @@ type Account = {
     cargo: cargo;
     physicalDamage: physicalDamage;
     generalLiability: generalLiability;
+    [key: string]: any;
 }
 export default function AddAccount() {
     // get values from http GET and display in dropdown
@@ -274,11 +275,11 @@ export default function AddAccount() {
             type="date"
             name="autoLiability.endDate"
             value={formData.autoLiability.endDate}
-            onChange={handleChange}
+            onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}
             placeholder="Expiration Date"
-        />
-        <select name="autoLiability.insurerId" onChange={handleChange}>
-            {insurers.map((insurer) => {
+            />
+            <select name="autoLiability.insurerId" onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}>
+                {insurers.map((insurer) => {
                 return <option key={insurer.id} value={insurer.id}>{insurer.name}</option>;
             })}
         </select>
@@ -310,12 +311,12 @@ export default function AddAccount() {
         <input
             type="date"
             name="cargo.endDate"
-            value={formData.cargo.endDate}
-            onChange={handleChange}
-            placeholder="Expiration Date"
-        />
-        <select name="cargo.insurerId" onChange={handleChange}>
-            {insurers.map((insurer) => {
+                    value={formData.cargo.endDate}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}
+                    placeholder="Expiration Date"
+                />
+                <select name="cargo.insurerId" onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}>
+                    {insurers.map((insurer) => {
                 return <option key={insurer.id} value={insurer.id}>{insurer.name}</option>;
             })}
         </select>
@@ -368,12 +369,12 @@ export default function AddAccount() {
         <input
             type="date"
             name="physicalDamage.endDate"
-            value={formData.physicalDamage.endDate}
-            onChange={handleChange}
-            placeholder="Expiration Date"
-        />
-        <select name="physicalDamage.insurerId" onChange={handleChange}>
-            {insurers.map((insurer) => {
+                value={formData.physicalDamage.endDate}
+                onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}
+                placeholder="Expiration Date"
+            />
+            <select name="physicalDamage.insurerId" onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}>
+                {insurers.map((insurer) => {
                 return <option key={insurer.id} value={insurer.id}>{insurer.name}</option>;
             })}
         </select>
@@ -472,7 +473,7 @@ export default function AddAccount() {
         onChange={handleChange}
         placeholder="General Aggregate Applies Per Policy"
     />
-        <select name="generalLiability.insurerId" onChange={handleChange}>
+        <select name="generalLiability.insurerId" onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleChange(event as React.ChangeEvent<HTMLInputElement>)}>
             {insurers.map((insurer) => {
                 return <option key={insurer.id} value={insurer.id}>{insurer.name}</option>;
             })}
@@ -483,7 +484,7 @@ export default function AddAccount() {
             <button type="submit">Submit</button>
         </div>
     </form>
-    <div className='flex flex-col items-start p-4 relative' open={isDialogOpen} onClick={() => setIsDialogOpen(false)}>
+    <div className='flex flex-col items-start p-4 relative' hidden={!isDialogOpen} onClick={() => setIsDialogOpen(false)}>
                 {submissionResponse && <p>API Response: {submissionResponse}</p>}
         </div>
     </div>
