@@ -25,6 +25,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         let added = [];
 
+        const user = req.body.User;
         const autoLiability = req.body.autoLiability;
         const physicalDamage = req.body.physicalDamage;
         const cargo = req.body.cargo;
@@ -49,6 +50,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         const errorMessages = [];
 
+        
+        try {
+            if(user.emailAddress) {
+                await axios.post(`${identityUrl}/customers/${customer.data.id}/invitations`, {
+                    "emailAddress": user.emailAddress,
+                    "givenName": user.givenName,
+                    "familyName": user.familyName,
+                }, config);
+            }
+        } catch (error) {
+                errorMessages.push("Failed to send invite: " + (error as Error).message);            
+            }
         try {
             if (autoLiability.policyNumber) {
                 await axios.post(`${lulaApi}/marketplace/api/insured/coverages`, {
