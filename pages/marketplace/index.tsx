@@ -42,6 +42,12 @@ interface generalLiability extends coverage{
     }
 }
 
+type User = {
+    emailAddress: string;
+    givenName: string;
+    familyName: string;
+}
+
 type Account = {
     BusinessLegalName: string;
     BusinessAddressLine1: string;
@@ -49,6 +55,7 @@ type Account = {
     BusinessCity: string;
     BusinessState: string;
     BusinessZipCode: string;
+    User: User;
     autoLiability: autoLiability;
     cargo: cargo;
     physicalDamage: physicalDamage;
@@ -71,6 +78,11 @@ export default function AddAccount() {
         BusinessCity: "",
         BusinessState: "",
         BusinessZipCode: "",
+        User: {
+            emailAddress: "",
+            givenName: "",
+            familyName: "",
+        },
         autoLiability: {
             policyNumber: "",
             startDate: "",
@@ -254,6 +266,31 @@ export default function AddAccount() {
             placeholder="Business Zip"
         />
     </div>
+        <div>
+            <br/>
+            <h2>Add User</h2>
+            <input
+                type="text"
+                name="User.emailAddress"
+                value={formData.User.emailAddress}
+                onChange={handleChange}
+                placeholder="Email"
+            />
+            <input
+                type="text"
+                name="User.givenName"
+                value={formData.User.givenName}
+                onChange={handleChange}
+                placeholder="First Name"
+            />
+            <input
+                type="text"
+                name="User.familyName"
+                value={formData.User.familyName}
+                onChange={handleChange}
+                placeholder="Last Name"
+            />
+        </div>
     <div>
         <br/>
         <h2>Add Auto Liability</h2>
