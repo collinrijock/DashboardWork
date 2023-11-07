@@ -11,7 +11,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             grant_type: "client_credentials",
             client_id: process.env.MARKETPLACE_AUTH_CLIENT_ID,
             client_secret: process.env.MARKETPLACE_AUTH_CLIENT_SECRET,
-        });
+        },
+            {
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                },
+            },
+        );
 
         const accessToken = atoken.data.access_token;
 
@@ -148,19 +154,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         try {
             if (generalLiability.policyNumber) {
-                await axios.post(
-                    `${lulaApi}/marketplace/api/insured/coverages`,
-                    {
-                        coverageType: "general-liability",
-                        policyNumber: generalLiability.policyNumber,
-                        insurerId: generalLiability.insurerId,
-                        insuredId: customer.data.id,
-                        startDate: generalLiability.startDate,
-                        endDate: generalLiability.endDate,
-                        coverageData: generalLiability.coverageData,
-                    },
-                    config
-                );
+                try {
+                    await axios.post(
+                        `${lulaApi}/marketplace/api/insured/coverages`,
+                        {
+                            coverageType: "general-liability",
+                            policyNumber: generalLiability.policyNumber,
+                            insurerId: generalLiability.insurerId,
+                            insuredId: customer.data.id,
+                            startDate: generalLiability.startDate,
+                            endDate: generalLiability.endDate,
+                            coverageData: generalLiability.coverageData,
+                        },
+                        config
+                    );
+                } catch (error) {
+                    console.log(JSON.stringify(error));
+                }
 
                 added.push("general liability");
             }
