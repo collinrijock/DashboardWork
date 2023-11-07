@@ -11,7 +11,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             grant_type: "client_credentials",
             client_id: process.env.MARKETPLACE_AUTH_CLIENT_ID,
             client_secret: process.env.MARKETPLACE_AUTH_CLIENT_SECRET,
-        });
+        },
+            {
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                },
+            },
+        );
 
         const accessToken = atoken.data.access_token;
 
@@ -160,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                         coverageData: generalLiability.coverageData,
                     },
                     config
-                );
+                );                
 
                 added.push("general liability");
             }
@@ -179,7 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             );
         }
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error:", JSON.stringify(error));
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
