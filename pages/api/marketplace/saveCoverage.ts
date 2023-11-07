@@ -154,23 +154,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         try {
             if (generalLiability.policyNumber) {
-                try {
-                    await axios.post(
-                        `${lulaApi}/marketplace/api/insured/coverages`,
-                        {
-                            coverageType: "general-liability",
-                            policyNumber: generalLiability.policyNumber,
-                            insurerId: generalLiability.insurerId,
-                            insuredId: customer.data.id,
-                            startDate: generalLiability.startDate,
-                            endDate: generalLiability.endDate,
-                            coverageData: generalLiability.coverageData,
-                        },
-                        config
-                    );
-                } catch (error) {
-                    console.log(JSON.stringify(error));
-                }
+                await axios.post(
+                    `${lulaApi}/marketplace/api/insured/coverages`,
+                    {
+                        coverageType: "general-liability",
+                        policyNumber: generalLiability.policyNumber,
+                        insurerId: generalLiability.insurerId,
+                        insuredId: customer.data.id,
+                        startDate: generalLiability.startDate,
+                        endDate: generalLiability.endDate,
+                        coverageData: generalLiability.coverageData,
+                    },
+                    config
+                );                
 
                 added.push("general liability");
             }
@@ -189,7 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             );
         }
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error:", JSON.stringify(error));
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
