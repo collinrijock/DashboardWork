@@ -256,7 +256,7 @@ export default function VehicleInfoPage() {
           :
           <div className='flex flex-col items-start p-4 relative'>
             <h2>This vin has no history in our underwriting records.</h2>
-            <h3 className='mt-4'>If you want to contribute a record, you can run this vin through AshleyBot, by clicking <a href='https://paddocks.lula.is/underwriting' target='_blank' className='cursor-pointer underline'>here.</a></h3>
+            <h3 className='mt-4'>If you want to contribute a record, you can run this vin through AshleyBot, by clicking <a href='https://paddocks.lularentals.com/underwriting' target='_blank' className='cursor-pointer underline'>here.</a></h3>
             <h3 className='mt-4'>After running a vin through AshleyBot, refresh this page.</h3>
           </div>
         }
